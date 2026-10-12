@@ -1,0 +1,206 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Theme tokens. Light is the default for the public site; `.dark` on <html>
+ * switches every surface. The hero and other "cinematic" blocks stay dark in
+ * both themes by using the fixed `ink-*` palette instead of these tokens.
+ */
+:root {
+  --gm-bg: #f4f6f9;
+  --gm-surface: #ffffff;
+  --gm-surface-2: #eef1f5;
+  --gm-surface-3: #e3e8ee;
+  --gm-line: #dfe4ea;
+  --gm-line-strong: #c7cfd9;
+  --gm-fg: #0b1220;
+  --gm-fg-soft: #2b3646;
+  --gm-muted: #5d6a7c;
+  --gm-input: #ffffff;
+  --gm-success: #059669;
+  --gm-warning: #d97706;
+  --gm-danger: #dc2626;
+  --gm-shadow: 0 1px 2px rgb(15 23 42 / 0.05), 0 8px 24px -12px rgb(15 23 42 / 0.12);
+  --gm-primary-shadow: 0 8px 24px -10px rgb(14 162 224 / 0.75);
+}
+
+/*
+ * Dark theme: true black surfaces, white text and a deep emerald accent.
+ * The brand and ink scales are re-pointed here so every `brand-*` accent and
+ * every "cinematic" ink block follows the dark palette without per-component overrides.
+ */
+.dark {
+  --gm-bg: #000000;
+  --gm-surface: #0c0c0c;
+  --gm-surface-2: #161616;
+  --gm-surface-3: #1f1f1f;
+  --gm-line: #262626;
+  --gm-line-strong: #383838;
+  --gm-fg: #ffffff;
+  --gm-fg-soft: #f0f0f0;
+  --gm-muted: #c8c8c8;
+  --gm-input: #0a0a0a;
+  --gm-success: #31a875;
+  --gm-warning: #e8b65c;
+  --gm-danger: #e46b6b;
+  --gm-shadow: 0 0 0 1px rgb(255 255 255 / 0.02);
+  --gm-primary-shadow: 0 6px 18px -10px rgb(22 118 83 / 0.7);
+
+  --color-brand-50: #e9f6f0;
+  --color-brand-100: #cdeadc;
+  --color-brand-200: #9fd8bf;
+  --color-brand-300: #6fc9a1;
+  --color-brand-400: #45b886;
+  --color-brand-500: #167653;
+  --color-brand-600: #1d9067;
+  --color-brand-700: #125f43;
+  --color-brand-800: #0f4c36;
+  --color-brand-900: #0b3b2a;
+
+  --color-ink-950: #000000;
+  --color-ink-900: #0c0c0c;
+  --color-ink-800: #161616;
+  --color-ink-700: #1f1f1f;
+  --color-ink-600: #2a2a2a;
+}
+
+@theme inline {
+  --color-bg: var(--gm-bg);
+  --color-surface: var(--gm-surface);
+  --color-surface-2: var(--gm-surface-2);
+  --color-surface-3: var(--gm-surface-3);
+  --color-line: var(--gm-line);
+  --color-line-strong: var(--gm-line-strong);
+  --color-fg: var(--gm-fg);
+  --color-fg-soft: var(--gm-fg-soft);
+  --color-muted: var(--gm-muted);
+  --color-input: var(--gm-input);
+  --color-success: var(--gm-success);
+  --color-warning: var(--gm-warning);
+  --color-danger: var(--gm-danger);
+  --shadow-card: var(--gm-shadow);
+  --shadow-primary: var(--gm-primary-shadow);
+}
+
+@theme {
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Sora', 'Manrope', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #eaf8ff;
+  --color-brand-100: #cdeffe;
+  --color-brand-200: #9fe1fd;
+  --color-brand-300: #5fcdfa;
+  --color-brand-400: #22b8f2;
+  --color-brand-500: #0ea2e0;
+  --color-brand-600: #0284c0;
+  --color-brand-700: #046a9b;
+  --color-brand-800: #0b587f;
+  --color-brand-900: #0f4a6a;
+
+  --color-ink-950: #05070a;
+  --color-ink-900: #0a0d12;
+  --color-ink-800: #11161e;
+  --color-ink-700: #1a212c;
+  --color-ink-600: #273140;
+
+  --color-whatsapp: #1fa855;
+  --color-whatsapp-dark: #178a45;
+
+  --radius-card: 1rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-bg text-fg font-sans antialiased;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display tracking-tight text-fg;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-400);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  .theme-switching *,
+  .theme-switching *::before,
+  .theme-switching *::after {
+    transition: none !important;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .card {
+    @apply rounded-2xl border border-line bg-surface shadow-card;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-sm font-semibold text-fg-soft;
+  }
+
+  .field-input {
+    @apply block min-h-11 w-full rounded-xl border border-line-strong bg-input px-3.5 py-2.5 text-[15px] text-fg placeholder:text-muted/80 transition-colors focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .field-input[aria-invalid='true'] {
+    @apply border-danger focus:ring-danger/25;
+  }
+
+  .field-error {
+    @apply mt-1.5 text-sm font-medium text-danger;
+  }
+
+  .eyebrow {
+    @apply text-xs font-bold uppercase tracking-[0.18em] text-brand-600 dark:text-brand-400;
+  }
+
+  .skeleton {
+    @apply animate-pulse rounded-lg bg-surface-3;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}

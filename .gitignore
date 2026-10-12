@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+# Firebase service-account JSON files must never be committed
+*firebase-adminsdk*.json
+service-account*.json
+screenshots/
