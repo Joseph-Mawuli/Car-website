@@ -1,0 +1,48 @@
+# Render Blueprint for the Goddel Motors API (https://render.com/docs/blueprint-spec).
+# Secrets use `sync: false`: Render asks for them when the Blueprint is first applied
+# and never reads them from this file.
+services:
+  - type: web
+    name: goddel-motors-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: Backend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      # The test-only in-memory MongoDB must not download a database binary during the build.
+      - key: MONGOMS_DISABLE_POSTINSTALL
+        value: "1"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: CORS_ORIGINS
+        value: https://car-website-1301e.web.app,https://car-website-1301e.firebaseapp.com
+      - key: PUBLIC_SITE_URL
+        value: https://car-website-1301e.web.app
+      - key: STORAGE_DRIVER
+        value: mongodb
+      - key: PUBLIC_API_URL
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: ENQUIRY_IP_SALT
+        generateValue: true
+      - key: FIREBASE_PROJECT_ID
+        value: car-website-1301e
+      - key: FIREBASE_CLIENT_EMAIL
+        value: firebase-adminsdk-fbsvc@car-website-1301e.iam.gserviceaccount.com
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: FIREBASE_WEB_API_KEY
+        sync: false
+      - key: MAX_UPLOAD_MB
+        value: "12"
+      - key: MAX_IMAGES_PER_VEHICLE
+        value: "8"
