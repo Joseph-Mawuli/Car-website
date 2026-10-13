@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 import type { Permission } from '@/types';
 import { SettingsProvider } from '@/providers/SettingsProvider';
 import { setMockHandler } from '@/lib/api';
+import { ToastProvider } from '@/components/ui/Toast';
 
 const authState = vi.hoisted(() => ({
   value: {
@@ -40,20 +41,22 @@ function renderAdmin(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <SettingsProvider>
-        <Routes>
-          <Route path="/admin/login" element={<p>Login screen</p>} />
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<p>Dashboard</p>} />
-            <Route
-              path="team"
-              element={
-                <RequirePermission permission="staff:manage">
-                  <p>Team management</p>
-                </RequirePermission>
-              }
-            />
-          </Route>
-        </Routes>
+        <ToastProvider>
+          <Routes>
+            <Route path="/admin/login" element={<p>Login screen</p>} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<p>Dashboard</p>} />
+              <Route
+                path="team"
+                element={
+                  <RequirePermission permission="staff:manage">
+                    <p>Team management</p>
+                  </RequirePermission>
+                }
+              />
+            </Route>
+          </Routes>
+        </ToastProvider>
       </SettingsProvider>
     </MemoryRouter>,
   );

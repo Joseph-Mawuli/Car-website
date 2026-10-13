@@ -19,6 +19,7 @@ export function adminRoutes(authDeps: AuthDeps, limiters: RateLimiters): Router 
   });
 
   router.get('/me', admin.me);
+  router.patch('/me', admin.updateMe);
   router.get('/dashboard', requirePermission('dashboard:read'), admin.dashboard);
 
   router.get('/vehicles', requirePermission('vehicles:read'), vehicles.list);

@@ -48,6 +48,7 @@ vi.mock('../src/services/staffService.js', () => ({
   listStaff: vi.fn(async () => []),
   inviteStaff: vi.fn(async () => ({ staff: fakeStaff, delivery: { method: 'smtp', emailed: true } })),
   updateStaff: vi.fn(async () => ({ before: fakeStaff, after: fakeStaff })),
+  updateOwnName: vi.fn(async () => ({ previousName: 'X', staff: { ...fakeStaff, displayName: 'New Name' } })),
   resendSetupLink: vi.fn(async () => ({ email: fakeStaff.email, delivery: { method: 'smtp', emailed: true } })),
   assignableStaff: vi.fn(async () => []),
 }));
@@ -101,13 +102,14 @@ const CASES: Record<string, Case> = {
   getSettings: { method: 'get', path: '/api/v1/admin/settings' },
   putSettings: { method: 'put', path: '/api/v1/admin/settings', body: settingsBody },
   auditLogs: { method: 'get', path: '/api/v1/admin/audit-logs' },
+  renameSelf: { method: 'patch', path: '/api/v1/admin/me', body: { displayName: 'New Name' } },
 };
 
 /** Expected access per role — mirrors the spec's role definitions. */
 const MATRIX: Record<'owner-token' | 'inventory-token' | 'sales-token', (keyof typeof CASES)[]> = {
   'owner-token': Object.keys(CASES) as (keyof typeof CASES)[],
-  'inventory-token': ['dashboard', 'listVehicles', 'createVehicle', 'updateVehicle', 'reorderImages', 'deleteImage'],
-  'sales-token': ['dashboard', 'listVehicles', 'listEnquiries', 'updateEnquiryStatus', 'addNote'],
+  'inventory-token': ['dashboard', 'listVehicles', 'createVehicle', 'updateVehicle', 'reorderImages', 'deleteImage', 'renameSelf'],
+  'sales-token': ['dashboard', 'listVehicles', 'listEnquiries', 'updateEnquiryStatus', 'addNote', 'renameSelf'],
 };
 
 function send(c: Case, token?: string) {
@@ -159,6 +161,24 @@ describe('authentication', () => {
     expect(res.body.permissions).toContain('enquiries:read');
     expect(res.body.permissions).not.toContain('vehicles:write');
     expect(res.headers['cache-control']).toBe('no-store');
+  });
+
+  it('lets staff rename themselves without touching their role or status', async () => {
+    const res = await request(app)
+      .patch('/api/v1/admin/me')
+      .set('Authorization', 'Bearer sales-token')
+      .send({ displayName: '  New Name  ', role: 'owner', status: 'active' });
+    expect(res.status).toBe(200);
+    expect(res.body.displayName).toBe('New Name');
+    expect(res.body.role).toBe('sales_assistant');
+    expect(staffService.updateOwnName).toHaveBeenCalledWith(expect.any(String), 'New Name');
+    expect(staffService.updateStaff).not.toHaveBeenCalled();
+  });
+
+  it('rejects a blank name when staff rename themselves', async () => {
+    const res = await request(app).patch('/api/v1/admin/me').set('Authorization', 'Bearer sales-token').send({ displayName: ' ' });
+    expect(res.status).toBe(400);
+    expect(staffService.updateOwnName).not.toHaveBeenCalled();
   });
 
   it.each(Object.entries(CASES))('blocks anonymous access to %s', async (_name, c) => {

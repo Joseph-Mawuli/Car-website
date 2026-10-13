@@ -14,7 +14,12 @@ export const updateStaffSchema = z
   .object({
     role: z.enum(ROLES).optional(),
     status: z.enum(STAFF_STATUSES).optional(),
-    displayName: cleanText(80).pipe(z.string().min(2)).optional(),
+    displayName: cleanText(80).pipe(z.string().min(2, 'Enter a name.')).optional(),
   })
   .refine((v) => v.role || v.status || v.displayName, 'Nothing to update.');
 export type UpdateStaffInput = z.infer<typeof updateStaffSchema>;
+
+/** What any signed-in staff member may change about their own account. */
+export const updateOwnProfileSchema = z.object({
+  displayName: cleanText(80).pipe(z.string().min(2, 'Enter a name.')),
+});

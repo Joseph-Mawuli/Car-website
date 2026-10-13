@@ -300,7 +300,16 @@ export async function handle(path: string, opts: Opts): Promise<unknown> {
   if (seg[0] !== 'admin') throw new ApiError(404, 'not_found', 'Not found.');
   const r = seg.slice(1);
 
-  if (r[0] === 'me') return me();
+  if (r[0] === 'me') {
+    if (method === 'PATCH') {
+      const name = String(body.displayName ?? '').trim();
+      if (name.length < 2) throw new ApiError(400, 'bad_request', 'Enter a name.');
+      const self = staff.find((s) => s.id === me().id)!;
+      log('staff.rename_self', `Changed own name from ${self.displayName} to ${name}`);
+      self.displayName = name;
+    }
+    return me();
+  }
   if (r[0] === 'dashboard') {
     const m = requirePerm('dashboard:read');
     const count = (f: (v: AdminVehicle) => boolean) => vehicles.filter(f).length;

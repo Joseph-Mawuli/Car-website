@@ -91,6 +91,14 @@ export async function resendSetupLink(id: string, actor: StaffPrincipal) {
   return { email: s.email, delivery };
 }
 
+export async function updateOwnName(id: string, displayName: string) {
+  const before = await Staff.findById(id, { displayName: 1 }).lean();
+  if (!before) throw notFound('Staff member not found.');
+  const doc = await Staff.findByIdAndUpdate(id, { $set: { displayName } }, { returnDocument: 'after', runValidators: true }).lean();
+  if (!doc) throw notFound('Staff member not found.');
+  return { previousName: before.displayName, staff: serializeStaff(doc) };
+}
+
 export async function updateStaff(id: string, input: UpdateStaffInput, actor: StaffPrincipal) {
   const target = await Staff.findById(id).lean();
   if (!target) throw notFound('Staff member not found.');

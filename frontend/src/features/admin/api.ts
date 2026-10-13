@@ -21,6 +21,7 @@ const auth = { auth: true } as const;
 
 export const adminApi = {
   me: () => apiRequest<CurrentStaff>('/admin/me', auth),
+  updateMyName: (displayName: string) => apiRequest<CurrentStaff>('/admin/me', { ...auth, method: 'PATCH', body: { displayName } }),
   dashboard: (signal?: AbortSignal) => apiRequest<DashboardSummary>('/admin/dashboard', { ...auth, signal }),
 
   listVehicles: (

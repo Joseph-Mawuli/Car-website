@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { z } from 'zod';
 import { idParams, pageQuery } from '../schemas/common.js';
 import { addNoteSchema, adminEnquiryQuery, updateEnquirySchema } from '../schemas/enquiry.js';
-import { inviteStaffSchema, updateStaffSchema } from '../schemas/staff.js';
+import { inviteStaffSchema, updateOwnProfileSchema, updateStaffSchema } from '../schemas/staff.js';
 import { updateSettingsSchema } from '../schemas/settings.js';
 import * as enquiries from '../services/enquiryService.js';
 import * as staff from '../services/staffService.js';
@@ -20,6 +20,16 @@ export async function me(req: Request, res: Response) {
   await staff.touchLastLogin(principal.id);
   const profile = await staff.getStaffMember(principal.id);
   res.set('Cache-Control', 'no-store').json({ ...profile, permissions: permissionsFor(principal.role) });
+}
+
+export async function updateMe(req: Request, res: Response) {
+  const principal = req.staff!;
+  const { displayName } = updateOwnProfileSchema.parse(req.body);
+  const { previousName, staff: updated } = await staff.updateOwnName(principal.id, displayName);
+  if (previousName !== updated.displayName) {
+    await recordAudit(principal, { action: 'staff.rename_self', targetType: 'staff', targetId: principal.id, summary: `Changed own name from ${previousName} to ${updated.displayName}` });
+  }
+  res.json({ ...updated, permissions: permissionsFor(principal.role) });
 }
 
 export async function dashboard(req: Request, res: Response) {
@@ -96,7 +106,7 @@ export async function updateStaff(req: Request, res: Response) {
   const parts: string[] = [];
   if (before.role !== after.role) parts.push(`role ${before.role} → ${after.role}`);
   if (before.status !== after.status) parts.push(after.status === 'disabled' ? 'access disabled' : 'access re-enabled');
-  if (before.displayName !== after.displayName) parts.push('name updated');
+  if (before.displayName !== after.displayName) parts.push(`name ${before.displayName} → ${after.displayName}`);
   await recordAudit(req.staff!, { action: 'staff.update', targetType: 'staff', targetId: id, summary: `${after.email}: ${parts.join('; ') || 'no changes'}` });
   res.json(after);
 }

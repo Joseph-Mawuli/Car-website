@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Copy, KeyRound, MailCheck, UserPlus, Users } from 'lucide-react';
+import { Copy, KeyRound, MailCheck, Pencil, UserPlus, Users } from 'lucide-react';
 import { adminApi } from '@/features/admin/api';
 import { useAuth } from '@/features/admin/AuthProvider';
+import { EditNameDialog } from '@/features/admin/EditNameDialog';
 import { AdminPageHeader } from '@/layouts/AdminLayout';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -140,10 +141,11 @@ function InviteDialog({ open, onClose, onInvited }: { open: boolean; onClose: ()
 }
 
 export function TeamPage() {
-  const { staff: me } = useAuth();
+  const { staff: me, refreshProfile } = useAuth();
   const { notify } = useToast();
   const { data, error, isLoading, reload, setData } = useQuery('admin-staff', (signal) => adminApi.listStaff(signal));
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [renaming, setRenaming] = useState<StaffMember | null>(null);
   const [confirm, setConfirm] = useState<StaffMember | null>(null);
   const [resent, setResent] = useState<DeliveryResult | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -160,6 +162,12 @@ export function TeamPage() {
     } finally {
       setBusyId(null);
     }
+  };
+
+  const rename = async (member: StaffMember, displayName: string) => {
+    replace(member.id === me?.id ? await adminApi.updateMyName(displayName) : await adminApi.updateStaff(member.id, { displayName }));
+    if (member.id === me?.id) await refreshProfile();
+    notify(`Name changed to ${displayName}`);
   };
 
   const newLink = async (member: StaffMember) => {
@@ -207,6 +215,15 @@ export function TeamPage() {
                   <p className="mt-1 text-xs text-muted">{m.lastLoginAt ? `Last sign-in ${formatDate(m.lastLoginAt)}` : 'Has not signed in yet'}</p>
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                  <Button
+                    variant="outline"
+                    disabled={busyId === m.id}
+                    onClick={() => setRenaming(m)}
+                    leftIcon={<Pencil className="h-4 w-4" aria-hidden />}
+                    aria-label={`Edit name for ${m.displayName}`}
+                  >
+                    Edit name
+                  </Button>
                   <SelectField
                     label="Role"
                     hideLabel
@@ -246,6 +263,15 @@ export function TeamPage() {
       <Dialog open={resent !== null} onClose={() => setResent(null)} title={resent?.delivery.emailed ? 'Invitation re-sent' : 'New setup link'}>
         {resent && <DeliveryNotice {...resent} onDone={() => setResent(null)} />}
       </Dialog>
+
+      <EditNameDialog
+        open={renaming !== null}
+        title={renaming?.id === me?.id ? 'Edit your name' : `Edit name for ${renaming?.displayName ?? ''}`}
+        description="The name shown on the team list, enquiry assignments and in the audit log. Their sign-in email stays the same."
+        currentName={renaming?.displayName ?? ''}
+        onClose={() => setRenaming(null)}
+        onSave={(name) => rename(renaming!, name)}
+      />
 
       <ConfirmDialog
         open={confirm !== null}

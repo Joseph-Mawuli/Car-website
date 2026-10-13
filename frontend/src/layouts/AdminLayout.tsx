@@ -1,12 +1,15 @@
 import { useState, type ReactNode } from 'react';
 import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router';
-import { ExternalLink, FileClock, Gauge, Inbox, LogOut, Menu, Settings, ShieldAlert, Users, CarFront } from 'lucide-react';
+import { ExternalLink, FileClock, Gauge, Inbox, LogOut, Menu, Pencil, Settings, ShieldAlert, Users, CarFront } from 'lucide-react';
 import { Logo } from '@/components/brand/Logo';
 import { PreviewModeBanner } from '@/components/layout/PreviewModeBanner';
 import { Dialog } from '@/components/ui/Dialog';
 import { ButtonLink } from '@/components/ui/Button';
 import { PageLoader } from '@/components/ui/States';
 import { useAuth } from '@/features/admin/AuthProvider';
+import { adminApi } from '@/features/admin/api';
+import { EditNameDialog } from '@/features/admin/EditNameDialog';
+import { useToast } from '@/components/ui/Toast';
 import { ROLE_LABELS } from '@/lib/labels';
 import { cn } from '@/lib/format';
 import type { Permission } from '@/types';
@@ -31,9 +34,11 @@ function initials(name: string): string {
 
 /** Redirects to the login page unless an active staff member is signed in. */
 export function AdminLayout() {
-  const { status, staff, can, signOut } = useAuth();
+  const { status, staff, can, signOut, refreshProfile } = useAuth();
+  const { notify } = useToast();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [editingName, setEditingName] = useState(false);
   useDocumentMeta({ title: 'Admin', noIndex: true });
 
   if (status === 'loading') return <PageLoader label="Checking your session" />;
@@ -49,16 +54,32 @@ export function AdminLayout() {
     );
 
   const userCard = (
-    <div className="flex items-center gap-3 rounded-xl bg-surface-2 p-3">
+    <button
+      type="button"
+      onClick={() => {
+        setMenuOpen(false);
+        setEditingName(true);
+      }}
+      title="Edit your name"
+      className="group flex w-full items-center gap-3 rounded-xl bg-surface-2 p-3 text-left ring-1 ring-inset ring-transparent transition-colors hover:ring-brand-500/40"
+    >
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-500 text-sm font-bold text-ink-950" aria-hidden>
         {initials(staff.displayName)}
       </span>
-      <span className="min-w-0">
+      <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-semibold">{staff.displayName}</span>
         <span className="block truncate text-xs text-muted">{ROLE_LABELS[staff.role]}</span>
       </span>
-    </div>
+      <Pencil className="h-4 w-4 shrink-0 text-muted transition-colors group-hover:text-brand-500" aria-hidden />
+      <span className="sr-only">Edit your name</span>
+    </button>
   );
+
+  const saveMyName = async (displayName: string) => {
+    await adminApi.updateMyName(displayName);
+    await refreshProfile();
+    notify('Your name has been updated');
+  };
 
   const navList = (onNavigate?: () => void) => (
     <nav aria-label="Admin" className="flex flex-col gap-1">
@@ -124,6 +145,15 @@ export function AdminLayout() {
           </div>
         </div>
       </Dialog>
+
+      <EditNameDialog
+        open={editingName}
+        title="Edit your name"
+        description="This is how your name appears to the team, on enquiry notes and in the audit log."
+        currentName={staff.displayName}
+        onClose={() => setEditingName(false)}
+        onSave={saveMyName}
+      />
 
       <main className="pb-24 lg:ml-64 lg:pb-10">
         <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
