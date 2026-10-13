@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ChevronLeft, ExternalLink, Save } from 'lucide-react';
+import { ChevronLeft, ExternalLink, Lock, Save } from 'lucide-react';
 import { adminApi } from '@/features/admin/api';
 import { useAuth } from '@/features/admin/AuthProvider';
 import { PhotoManager } from '@/features/admin/PhotoManager';
@@ -17,7 +17,7 @@ import { Alert, ErrorState, PageLoader } from '@/components/ui/States';
 import { useToast } from '@/components/ui/Toast';
 import { useQuery } from '@/hooks/useQuery';
 import { ApiError, errorMessage } from '@/lib/api';
-import { formatDate } from '@/lib/format';
+import { cn, formatDate } from '@/lib/format';
 import {
   AVAILABILITY_LABELS,
   BODY_TYPE_LABELS,
@@ -48,6 +48,11 @@ const formSchema = z.object({
   make: z.string().trim().min(1, 'Make is required.').max(40),
   model: z.string().trim().min(1, 'Model is required.').max(60),
   trim: z.string().trim().max(60),
+  vin: z
+    .string()
+    .trim()
+    .max(30, 'Keep this under 30 characters.')
+    .regex(/^[A-Za-z0-9\- ]*$/, 'Use letters, numbers and dashes only.'),
   year: z
     .string()
     .regex(/^\d{4}$/, 'Enter a 4-digit year.')
@@ -78,6 +83,7 @@ const EMPTY: FormValues = {
   make: '',
   model: '',
   trim: '',
+  vin: '',
   year: '',
   price: '',
   currency: 'GHS',
@@ -105,6 +111,7 @@ function toForm(v: AdminVehicle): FormValues {
     make: v.make,
     model: v.model,
     trim: v.trim ?? '',
+    vin: v.vin ?? '',
     year: String(v.year),
     price: String(v.price),
     currency: v.currency,
@@ -136,6 +143,7 @@ function toPayload(values: FormValues): Record<string, unknown> {
     make: values.make.trim(),
     model: values.model.trim(),
     trim: opt(values.trim),
+    vin: opt(values.vin.toUpperCase()),
     year: Number(values.year),
     price: Number(values.price),
     currency: values.currency,
@@ -352,6 +360,21 @@ function VehicleEditor({ vehicle, onSaved, onReload }: { vehicle?: AdminVehicle;
             <TextField label="Year" required inputMode="numeric" maxLength={4} error={errors.year?.message} className={hl('year')} {...register('year')} />
             {choiceField('bodyType', 'Body type')}
             {choiceField('condition', 'Condition')}
+            <TextField
+              label="VIN / chassis number"
+              placeholder="e.g. 4T1BF1FK5CU123456"
+              autoCapitalize="characters"
+              spellCheck={false}
+              hint={
+                <span className="inline-flex items-center gap-1">
+                  <Lock className="h-3 w-3" aria-hidden /> Staff only — never shown on the website.
+                </span>
+              }
+              error={errors.vin?.message}
+              wrapperClassName="sm:col-span-2 lg:col-span-1"
+              className={cn('font-mono uppercase tracking-wide', hl('vin'))}
+              {...register('vin')}
+            />
           </div>
         </Section>
 

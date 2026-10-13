@@ -95,6 +95,8 @@ export interface Vehicle extends VehicleSummary {
 }
 
 export interface AdminVehicle extends Vehicle {
+  /** VIN or chassis number — staff only, never sent to the public site. */
+  vin?: string;
   visibility: Visibility;
   version: number;
   createdBy?: { id: string; name: string };

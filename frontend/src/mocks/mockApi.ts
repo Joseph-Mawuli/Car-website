@@ -180,7 +180,13 @@ function paginate<T>(items: T[], page = 1, limit = 12): Paginated<T> {
 }
 
 function summary(v: AdminVehicle): VehicleSummary {
-  return { ...v, primaryImage: v.images[0] };
+  return { ...publicVehicle(v), primaryImage: v.images[0] };
+}
+/** Mirrors the real API: staff-only fields never reach public pages. */
+function publicVehicle(v: AdminVehicle) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { vin, ...rest } = v;
+  return rest;
 }
 const published = () => vehicles.filter((v) => v.visibility === 'published');
 const findVehicle = (id: string) => {
@@ -276,7 +282,7 @@ export async function handle(path: string, opts: Opts): Promise<unknown> {
   if (method === 'GET' && seg[0] === 'vehicles' && seg.length === 2) {
     const v = published().find((x) => x.slug === decodeURIComponent(seg[1]));
     if (!v) throw new ApiError(404, 'not_found', 'Vehicle not found.');
-    return { vehicle: v, related: published().filter((x) => x.id !== v.id && x.availabilityStatus !== 'sold').slice(0, 3).map(summary) };
+    return { vehicle: publicVehicle(v), related: published().filter((x) => x.id !== v.id && x.availabilityStatus !== 'sold').slice(0, 3).map(summary) };
   }
   if (route === 'POST /enquiries') {
     const vehicle = vehicles.find((v) => v.id === body.vehicleId);

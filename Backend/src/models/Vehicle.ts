@@ -46,6 +46,8 @@ export interface VehicleRecord {
   make: string;
   model: string;
   trim?: string;
+  /** VIN or chassis number. Staff-only: never included in public responses. */
+  vin?: string;
   year: number;
   price: number;
   currency: CurrencyCode;
@@ -105,6 +107,7 @@ const vehicleSchema = new Schema<VehicleRecord>(
     make: { type: String, required: true, trim: true, maxlength: 40 },
     model: { type: String, required: true, trim: true, maxlength: 60 },
     trim: { type: String, trim: true, maxlength: 60 },
+    vin: { type: String, trim: true, uppercase: true, maxlength: 30 },
     year: { type: Number, required: true, min: 1950, max: 2100 },
     price: { type: Number, required: true, min: 0 },
     currency: { type: String, enum: CURRENCIES, required: true, default: 'GHS' },

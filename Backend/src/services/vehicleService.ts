@@ -15,13 +15,15 @@ const SUMMARY_PROJECTION = {
   images: { $slice: 24 },
 } as const;
 
-function keywordFilter(q: string): QueryFilter<VehicleRecord> {
+function keywordFilter(q: string, { includeVin = false } = {}): QueryFilter<VehicleRecord> {
   // Every word must match make, model or trim — supports "toyota rav4" style searches.
   const words = q.split(/\s+/).filter(Boolean).slice(0, 5);
   return {
     $and: words.map((w) => {
       const rx = new RegExp(escapeRegex(w), 'i');
-      return { $or: [{ make: rx }, { model: rx }, { trim: rx }, { bodyType: rx }, { exteriorColor: rx }] };
+      const fields: QueryFilter<VehicleRecord>[] = [{ make: rx }, { model: rx }, { trim: rx }, { bodyType: rx }, { exteriorColor: rx }];
+      if (includeVin) fields.push({ vin: rx });
+      return { $or: fields };
     }),
   };
 }
@@ -205,7 +207,7 @@ export async function listAdminVehicles(query: AdminVehicleQuery) {
   if (query.availability) filter.availabilityStatus = query.availability;
   if (query.visibility) filter.visibility = query.visibility;
   else filter.visibility = { $ne: 'archived' };
-  if (query.q) Object.assign(filter, keywordFilter(query.q));
+  if (query.q) Object.assign(filter, keywordFilter(query.q, { includeVin: true }));
 
   const skip = (query.page - 1) * query.limit;
   const [docs, total] = await Promise.all([

@@ -44,6 +44,11 @@ const vehicleFields = {
   make: cleanText(40).pipe(z.string().min(1, 'Make is required.')),
   model: cleanText(60).pipe(z.string().min(1, 'Model is required.')),
   trim: optionalText(60),
+  /** 17-character VIN, or a shorter Japanese chassis number such as "NZE141-1234567". */
+  vin: z
+    .union([cleanText(30).pipe(z.string().regex(/^[A-Za-z0-9\- ]*$/, 'Use letters, numbers and dashes only.')), z.null()])
+    .optional()
+    .transform((v) => (v === '' ? null : typeof v === 'string' ? v.toUpperCase() : v)),
   year: z.coerce.number().int().min(1950, 'Year looks too early.').max(maxYear, `Year cannot be after ${maxYear}.`),
   price: z.coerce.number().min(0, 'Price cannot be negative.').max(1_000_000_000),
   currency: z.enum(CURRENCIES),

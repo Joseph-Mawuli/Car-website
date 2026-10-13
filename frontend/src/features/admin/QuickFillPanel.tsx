@@ -9,6 +9,7 @@ export const QUICK_FILL_LABELS: Record<QuickFillField, string> = {
   make: 'Make',
   model: 'Model',
   trim: 'Trim',
+  vin: 'VIN',
   year: 'Year',
   price: 'Price',
   currency: 'Currency',

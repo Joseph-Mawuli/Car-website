@@ -103,6 +103,7 @@ function staffRef(ref: PopulatedStaff) {
 export function serializeAdminVehicle(v: WithId<VehicleRecord>) {
   return {
     ...serializeVehicle(v),
+    vin: v.vin ?? undefined,
     visibility: v.visibility,
     version: v.__v ?? 0,
     createdBy: staffRef(v.createdBy as unknown as PopulatedStaff),

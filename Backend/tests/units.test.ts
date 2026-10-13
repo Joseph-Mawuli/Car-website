@@ -13,6 +13,8 @@ import { createEnquirySchema } from '../src/schemas/enquiry.js';
 import { updateSettingsSchema } from '../src/schemas/settings.js';
 import { stripControlChars } from '../src/schemas/common.js';
 import { createVehicleSchema, normalizeChoice } from '../src/schemas/vehicle.js';
+import { serializeAdminVehicle, serializeVehicle, serializeVehicleSummary } from '../src/services/serializers.js';
+import { Types } from 'mongoose';
 
 describe('role permissions', () => {
   it('gives the owner every permission', () => {
@@ -117,6 +119,36 @@ describe('vehicle choice fields', () => {
 
   it('limits custom wording to 40 characters', () => {
     expect(createVehicleSchema.safeParse({ ...base, bodyType: 'x'.repeat(41) }).success).toBe(false);
+  });
+});
+
+describe('vehicle VIN', () => {
+  const base = { make: 'Toyota', model: 'Camry', year: 2018, price: 250000 };
+
+  it('is stored in capitals and accepts Japanese chassis numbers', () => {
+    expect(createVehicleSchema.parse({ ...base, vin: ' 4t1bf1fk5cu123456 ' }).vin).toBe('4T1BF1FK5CU123456');
+    expect(createVehicleSchema.parse({ ...base, vin: 'NZE141-1234567' }).vin).toBe('NZE141-1234567');
+    expect(createVehicleSchema.parse({ ...base, vin: '' }).vin).toBeNull();
+    expect(createVehicleSchema.safeParse({ ...base, vin: 'VIN#<script>' }).success).toBe(false);
+  });
+
+  it('is only included for staff, never in public vehicle data', () => {
+    const record = {
+      _id: new Types.ObjectId(),
+      slug: 'toyota-camry-2018',
+      ...base,
+      currency: 'GHS',
+      availabilityStatus: 'available',
+      visibility: 'published',
+      vin: '4T1BF1FK5CU123456',
+      features: [],
+      images: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as unknown as Parameters<typeof serializeVehicle>[0];
+    expect(JSON.stringify(serializeVehicle(record))).not.toContain('4T1BF1FK5CU123456');
+    expect(JSON.stringify(serializeVehicleSummary(record))).not.toContain('4T1BF1FK5CU123456');
+    expect(serializeAdminVehicle(record).vin).toBe('4T1BF1FK5CU123456');
   });
 });
 

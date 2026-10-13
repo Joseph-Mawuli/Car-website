@@ -126,7 +126,7 @@ export function InventoryPage() {
               setQ(e.target.value);
               if (params.get('page')) setParam('page');
             }}
-            placeholder="Search make, model, trim…"
+            placeholder="Search make, model, VIN…"
             className="field-input pl-10"
           />
         </div>

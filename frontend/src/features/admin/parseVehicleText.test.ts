@@ -104,6 +104,14 @@ Condition: Excellent, no scratches`);
     expect(values.conditionNotes).toBe('Excellent, no scratches');
   });
 
+  it('reads VIN and chassis numbers', () => {
+    expect(parseVehicleText('Toyota Camry 2012\nVIN: 4t1bf1fk5cu123456').values.vin).toBe('4T1BF1FK5CU123456');
+    expect(parseVehicleText('Toyota Corolla 2008\nChassis no: NZE141-1234567').values.vin).toBe('NZE141-1234567');
+    const { values } = parseVehicleText('2012 Toyota Camry 4T1BF1FK5CU123456 clean');
+    expect(values.vin).toBe('4T1BF1FK5CU123456');
+    expect(values.model).toBe('Camry');
+  });
+
   it('puts sentences in the description and never invents missing details', () => {
     const { values } = parseVehicleText(`Toyota Corolla
 This car has been well maintained and drives very smoothly on all roads.`);

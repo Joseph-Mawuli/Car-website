@@ -5,6 +5,7 @@ export type QuickFillField =
   | 'make'
   | 'model'
   | 'trim'
+  | 'vin'
   | 'year'
   | 'price'
   | 'currency'
@@ -153,7 +154,8 @@ const LABELS: [RegExp, LabelTarget][] = [
   [/^(?:description|details|about|overview|notes?)$/, 'description'],
   [/^(?:condition notes?|history)$/, 'conditionNotes'],
   [/^(?:known )?(?:defects?|issues?|faults?|problems?)$/, 'knownDefects'],
-  [/^(?:vin|chassis(?: number| no\.?)?|reg(?:istration)?(?: number| no\.?)?|plate|stock(?: number| no\.?)?|phone|contact|whats ?app|tel)$/, 'ignore'],
+  [/^(?:vin(?: number| no\.?)?|chassis(?: number| no\.?)?|frame(?: number| no\.?)?)$/, 'vin'],
+  [/^(?:reg(?:istration)?(?: number| no\.?)?|plate|stock(?: number| no\.?)?|phone|contact|whats ?app|tel)$/, 'ignore'],
 ];
 
 function labelTarget(key: string): LabelTarget | undefined {
@@ -239,6 +241,14 @@ function findEngine(text: string): string | undefined {
   return [base, cyl, turbo].filter(Boolean).join(' ').slice(0, 30);
 }
 
+/** Standard 17-character VIN (never contains I, O or Q), with at least one letter and one digit. */
+function findVin(text: string): string | undefined {
+  for (const m of text.matchAll(/\b[A-HJ-NPR-Z0-9]{17}\b/gi)) {
+    if (/\d/.test(m[0]) && /[a-z]/i.test(m[0])) return m[0].toUpperCase();
+  }
+  return undefined;
+}
+
 function findYear(text: string): string | undefined {
   for (const m of text.matchAll(/\b(19[5-9]\d|20\d\d)\b/g)) {
     const y = Number(m[1]);
@@ -315,7 +325,8 @@ export function parseVehicleText(input: string): QuickFillResult {
       section = undefined;
       continue;
     }
-    if (CONTACT_LINE.test(line) || /(?:\+?\d[\d\s-]{8,}\d)/.test(line.replace(/\d{1,3}(,\d{3})+/g, ''))) {
+    const isVinLine = /^(?:vin|chassis|frame)\b/i.test(line);
+    if (!isVinLine && (CONTACT_LINE.test(line) || /(?:\+?\d[\d\s-]{8,}\d)/.test(line.replace(/\d{1,3}(,\d{3})+/g, '')))) {
       if (!/\b(price|mileage|km|miles)\b/i.test(line)) continue;
     }
 
@@ -356,6 +367,11 @@ export function parseVehicleText(input: string): QuickFillResult {
         case 'year':
           set('year', findYear(value));
           break;
+        case 'vin': {
+          const vin = value.replace(/[^A-Za-z0-9\- ]/g, '').trim().toUpperCase();
+          if (vin.length >= 5) set('vin', vin.slice(0, 30));
+          break;
+        }
         case 'engineSize':
           set('engineSize', findEngine(value) ?? value.slice(0, 30));
           break;
@@ -401,6 +417,7 @@ export function parseVehicleText(input: string): QuickFillResult {
     set('model', mm.model);
     set('trim', mm.trim);
   }
+  set('vin', findVin(free));
   set('year', findYear(title) ?? findYear(free));
   const price = findPrice(free, true);
   if (price) {
@@ -452,6 +469,7 @@ export function parseVehicleText(input: string): QuickFillResult {
 
 /** Short lines like "Automatic" or "GH₵ 250,000" whose information was already captured elsewhere. */
 function isConsumed(line: string, values: QuickFillResult['values']): boolean {
+  if (values.vin && line.toUpperCase().includes(values.vin)) return true;
   if (findPrice(line, true) || findMileage(line) || findEngine(line) || findYear(line)) return true;
   if (CHOICES.some(({ field }) => matchChoice(field, line))) return true;
   if (COLOUR_RE.test(line) && (values.exteriorColor || values.interiorColor)) return true;
