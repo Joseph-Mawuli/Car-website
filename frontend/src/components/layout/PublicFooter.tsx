@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { Clock, Lock, Mail, MapPin, Phone } from 'lucide-react';
-import { BRAND_SLOGAN, Logo } from '@/components/brand/Logo';
+import { DEFAULT_MOTTO, Logo } from '@/components/brand/Logo';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { useSettings } from '@/providers/SettingsProvider';
 import { allPhones, buildMailtoLink, buildTelLink, buildWhatsAppLink } from '@/lib/contact';
@@ -17,7 +17,7 @@ export function PublicFooter() {
         <div className="sm:col-span-2 lg:col-span-1">
           <Logo showSlogan={false} />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/60">
-            {settings.tagline || `${BRAND_SLOGAN}.`}
+            {settings.motto || DEFAULT_MOTTO}
           </p>
         </div>
 
@@ -112,7 +112,7 @@ export function PublicFooter() {
       </div>
       <div className="border-t border-white/10">
         <div className="container-page flex flex-col gap-2 py-5 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {year} Goddel Motors. All rights reserved.</p>
+          <p>© {year} {settings.dealershipName}. All rights reserved.</p>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
             {settings.exchangeRates?.sourceUrl && (
               <a href={settings.exchangeRates.sourceUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white/80">

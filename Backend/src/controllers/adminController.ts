@@ -9,9 +9,10 @@ import * as staff from '../services/staffService.js';
 import * as vehicles from '../services/vehicleService.js';
 import { getSettingsRecord, serializeAdminSettings, updateSettings } from '../services/settingsService.js';
 import { listAuditLogs, recordAudit } from '../services/auditService.js';
+import { removeLogo, setLogo } from '../services/logoService.js';
 import type { SetupLinkDelivery } from '../services/setupLinkDelivery.js';
 import { hasPermission } from '../lib/permissions.js';
-import { forbidden } from '../lib/errors.js';
+import { badRequest, forbidden } from '../lib/errors.js';
 import { permissionsFor } from '../middleware/auth.js';
 
 export async function me(req: Request, res: Response) {
@@ -132,6 +133,19 @@ export async function putSettings(req: Request, res: Response) {
     targetType: 'settings',
     summary: `Updated site settings${rateNote}`,
   });
+  res.json(settings);
+}
+
+export async function uploadLogo(req: Request, res: Response) {
+  if (!req.file) throw badRequest('Choose a logo image to upload.');
+  const settings = await setLogo(req.file);
+  await recordAudit(req.staff!, { action: 'settings.logo.upload', targetType: 'settings', summary: 'Uploaded a new logo' });
+  res.json(settings);
+}
+
+export async function deleteLogo(req: Request, res: Response) {
+  const settings = await removeLogo();
+  await recordAudit(req.staff!, { action: 'settings.logo.delete', targetType: 'settings', summary: 'Removed the custom logo' });
   res.json(settings);
 }
 

@@ -66,6 +66,12 @@ export const adminApi = {
 
   getSettings: (signal?: AbortSignal) => apiRequest<AdminSettings>('/admin/settings', { ...auth, signal }),
   updateSettings: (body: Record<string, unknown>) => apiRequest<AdminSettings>('/admin/settings', { ...auth, method: 'PUT', body }),
+  uploadLogo: (file: File, onProgress?: (f: number) => void) => {
+    const form = new FormData();
+    form.append('logo', file);
+    return apiUpload<AdminSettings>('/admin/settings/logo', form, { method: 'PUT', onProgress });
+  },
+  deleteLogo: () => apiRequest<AdminSettings>('/admin/settings/logo', { ...auth, method: 'DELETE' }),
 
   auditLogs: (page: number, signal?: AbortSignal) => apiRequest<Paginated<AuditLogEntry>>('/admin/audit-logs', { ...auth, query: { page }, signal }),
 };

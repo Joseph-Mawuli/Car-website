@@ -25,7 +25,7 @@ export function AboutPage() {
 
   return (
     <>
-      <PageHero eyebrow="About us" title="About Goddel Motors">
+      <PageHero eyebrow="About us" title={`About ${settings.dealershipName}`}>
         Your trusted partner in finding your next vehicle.
       </PageHero>
 

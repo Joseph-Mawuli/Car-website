@@ -2,7 +2,7 @@ import { NavLink } from 'react-router';
 import { Car, Home, Mail, Phone } from 'lucide-react';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { useSettings } from '@/providers/SettingsProvider';
-import { buildTelLink, buildWhatsAppLink } from '@/lib/contact';
+import { buildTelLink, buildGeneralWhatsAppMessage, buildWhatsAppLink } from '@/lib/contact';
 import { cn } from '@/lib/format';
 
 const itemClass = 'flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold';
@@ -39,7 +39,7 @@ export function MobileBottomNav() {
         )}
         {settings.whatsapp && (
           <a
-            href={buildWhatsAppLink(settings.whatsapp, 'Hello Goddel Motors, I would like to enquire about your vehicles.')}
+            href={buildWhatsAppLink(settings.whatsapp, buildGeneralWhatsAppMessage(settings.dealershipName))}
             target="_blank"
             rel="noopener noreferrer"
             className={cn(itemClass, 'text-whatsapp')}

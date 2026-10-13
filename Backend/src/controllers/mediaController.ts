@@ -2,7 +2,8 @@ import type { Request, Response } from 'express';
 import { getStorage, MongoStorage } from '../services/storage.js';
 
 /** Only keys produced by the upload pipeline can be requested. */
-const MEDIA_KEY = /^vehicles\/[a-f0-9]{24}\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/(?:original\.jpg|\d{2,5}\.webp)$/;
+const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+const MEDIA_KEY = new RegExp(`^(?:vehicles/[a-f0-9]{24}/${UUID}/(?:original\\.jpg|\\d{2,5}\\.webp)|branding/logo-${UUID}\\.webp)$`);
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/webp']);
 
 function notFound(res: Response) {

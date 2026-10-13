@@ -24,7 +24,7 @@ export function PublicHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-line/70 bg-bg/85 backdrop-blur-md">
       <div className="container-page flex h-16 items-center gap-3 md:h-[76px]">
-        <Link to="/" className="rounded-lg" aria-label="Goddel Motors home">
+        <Link to="/" className="rounded-lg" aria-label={`${settings.dealershipName} home`}>
           <Logo />
         </Link>
 

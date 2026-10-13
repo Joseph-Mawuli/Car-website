@@ -48,6 +48,8 @@ export function adminRoutes(authDeps: AuthDeps, limiters: RateLimiters): Router 
 
   router.get('/settings', requirePermission('settings:manage'), admin.getSettings);
   router.put('/settings', requirePermission('settings:manage'), admin.putSettings);
+  router.put('/settings/logo', requirePermission('settings:manage'), limiters.upload, imageUpload.single('logo'), admin.uploadLogo);
+  router.delete('/settings/logo', requirePermission('settings:manage'), admin.deleteLogo);
 
   router.get('/audit-logs', requirePermission('audit:read'), admin.auditLogs);
 

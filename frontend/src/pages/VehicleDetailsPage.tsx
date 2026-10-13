@@ -89,7 +89,7 @@ function VehicleDetailsContent({ vehicle, related }: { vehicle: Vehicle; related
   const isReserved = vehicle.availabilityStatus === 'reserved';
 
   const whatsappHref = settings.whatsapp
-    ? buildWhatsAppLink(settings.whatsapp, buildVehicleWhatsAppMessage(`${vehicle.title} (${formatPrice(vehicle.price, vehicle.currency)})`, pageUrl))
+    ? buildWhatsAppLink(settings.whatsapp, buildVehicleWhatsAppMessage(`${vehicle.title} (${formatPrice(vehicle.price, vehicle.currency)})`, pageUrl, settings.dealershipName))
     : undefined;
   const telHref = settings.phone ? buildTelLink(settings.phone) : undefined;
   const currencies = availableDisplayCurrencies(vehicle.currency, settings.supportedCurrencies, settings.exchangeRates);

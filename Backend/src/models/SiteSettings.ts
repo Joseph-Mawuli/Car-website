@@ -4,7 +4,13 @@ import { CURRENCIES, EXCHANGE_RATE_MODES, type CurrencyCode, type ExchangeRateMo
 export interface SiteSettingsRecord {
   key: 'site';
   dealershipName: string;
+  /** Short line shown under the logo, e.g. "Trust In Every Drive". */
+  motto?: string;
+  /** Replaced by `motto`; removed from the document on the next settings save. */
   tagline?: string;
+  logo?: SiteLogoRecord;
+  /** When true the uploaded logo already shows the business name, so it isn't repeated beside it. */
+  logoIncludesName: boolean;
   phone?: string;
   /** Extra numbers shown alongside the main phone. */
   additionalPhones: string[];
@@ -32,11 +38,36 @@ export interface SiteSettingsRecord {
   createdAt: Date;
 }
 
+export interface SiteLogoRecord {
+  key: string;
+  url: string;
+  source: 'r2' | 'mongodb';
+  width: number;
+  height: number;
+  uploadedAt: Date;
+}
+
 const siteSettingsSchema = new Schema<SiteSettingsRecord>(
   {
     key: { type: String, required: true, unique: true, default: 'site' },
     dealershipName: { type: String, required: true, default: 'Goddel Motors', maxlength: 80 },
+    motto: { type: String, maxlength: 80 },
     tagline: { type: String, maxlength: 200 },
+    logo: {
+      type: new Schema(
+        {
+          key: { type: String, required: true },
+          url: { type: String, required: true },
+          source: { type: String, enum: ['r2', 'mongodb'], required: true },
+          width: Number,
+          height: Number,
+          uploadedAt: Date,
+        },
+        { _id: false },
+      ),
+      default: undefined,
+    },
+    logoIncludesName: { type: Boolean, default: false },
     phone: { type: String, maxlength: 30 },
     additionalPhones: { type: [{ type: String, maxlength: 30 }], default: [] },
     whatsapp: { type: String, maxlength: 30 },

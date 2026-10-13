@@ -10,6 +10,7 @@ import { Checkbox, TextAreaField, TextField } from '@/components/ui/Field';
 import { Alert } from '@/components/ui/States';
 import { ApiError, errorMessage } from '@/lib/api';
 import { cn } from '@/lib/format';
+import { useSettings } from '@/providers/SettingsProvider';
 
 interface Props {
   vehicleId?: string;
@@ -25,6 +26,7 @@ const CONTACT_OPTIONS = [
 ] as const;
 
 export function EnquiryForm({ vehicleId, vehicleTitle, defaultMessage, className }: Props) {
+  const { settings } = useSettings();
   const [startedAt, setStartedAt] = useState(() => Date.now());
   const [submittedId, setSubmittedId] = useState<string | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -130,7 +132,7 @@ export function EnquiryForm({ vehicleId, vehicleTitle, defaultMessage, className
       <Checkbox
         label={
           <>
-            I agree that Goddel Motors may use these details to respond to my enquiry, as described in the{' '}
+            I agree that {settings.dealershipName} may use these details to respond to my enquiry, as described in the{' '}
             <Link to="/contact#privacy" className="font-semibold text-brand-500 underline hover:text-brand-300">
               privacy notice
             </Link>

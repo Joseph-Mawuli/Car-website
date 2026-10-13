@@ -1,7 +1,8 @@
-import { SiteSettings, type SiteSettingsRecord } from '../models/SiteSettings.js';
+import { SiteSettings, type SiteLogoRecord, type SiteSettingsRecord } from '../models/SiteSettings.js';
 import type { UpdateSettingsInput } from '../schemas/settings.js';
 import type { CurrencyCode } from '../types/domain.js';
 import { getLiveRates } from './liveRates.js';
+import { mongoMediaUrl } from './storage.js';
 
 export async function getSettingsRecord(): Promise<SiteSettingsRecord> {
   const doc = await SiteSettings.findOneAndUpdate(
@@ -63,10 +64,17 @@ export async function serializeAdminSettings(s: SiteSettingsRecord) {
   return { ...serializeSettings(s), liveExchangeRates: (await getLiveRates(s.defaultCurrency)) ?? undefined };
 }
 
+/** MongoDB-stored logos are served by this API, so the link is rebuilt for the current host. */
+function logoUrl(logo: SiteLogoRecord): string {
+  return logo.source === 'mongodb' ? mongoMediaUrl(logo.key) : logo.url;
+}
+
 function serializeSettings(s: SiteSettingsRecord) {
   return {
     dealershipName: s.dealershipName,
-    tagline: s.tagline,
+    motto: s.motto,
+    logoUrl: s.logo ? logoUrl(s.logo) : undefined,
+    logoIncludesName: Boolean(s.logo && s.logoIncludesName),
     phone: s.phone,
     additionalPhones: s.additionalPhones ?? [],
     whatsapp: s.whatsapp,
@@ -111,8 +119,8 @@ export async function updateSettings(input: UpdateSettingsInput) {
 
   const { exchangeRates, ...rest } = input;
   const update: Record<string, unknown> = { ...rest };
-  const unset: Record<string, ''> = {};
-  for (const key of ['tagline', 'phone', 'whatsapp', 'email', 'address', 'mapUrl', 'aboutHeading', 'aboutBody', 'privacyNotice'] as const) {
+  const unset: Record<string, ''> = { tagline: '' };
+  for (const key of ['motto', 'phone', 'whatsapp', 'email', 'address', 'mapUrl', 'aboutHeading', 'aboutBody', 'privacyNotice'] as const) {
     if (input[key] === undefined) {
       delete update[key];
       unset[key] = '';

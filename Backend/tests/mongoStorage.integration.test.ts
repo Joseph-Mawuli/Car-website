@@ -7,6 +7,7 @@ import { getStorage, MongoStorage } from '../src/services/storage.js';
 import { deleteStoredImages, processImage } from '../src/services/imageService.js';
 import { PendingDeletion } from '../src/models/PendingDeletion.js';
 import { serializeImage } from '../src/services/serializers.js';
+import { processLogo } from '../src/services/logoService.js';
 import { buildTestApp } from './helpers.js';
 
 let mongo: MongoMemoryServer;
@@ -109,6 +110,26 @@ describe('MongoDB photo storage (GridFS)', { timeout: 30_000 }, () => {
     });
     expect(img.url).toBe('http://localhost:5173/images/vehicles/demo/demo-suv-1600.webp');
     expect(img.variants.thumb?.url).toBe('http://localhost:5173/images/vehicles/demo/demo-suv-480.webp');
+  });
+
+  it('keeps logo transparency, caps its size and serves it from the branding path', async () => {
+    const input = await sharp({ create: { width: 2000, height: 600, channels: 4, background: { r: 245, g: 185, b: 35, alpha: 0 } } }).png().toBuffer();
+    const logo = await processLogo(input);
+    expect(logo.width).toBe(800);
+    expect((await sharp(logo.buffer).metadata()).hasAlpha).toBe(true);
+
+    const key = 'branding/logo-1b4e28ba-2fa1-11d2-883f-0016d3cca427.webp';
+    await storage.put(key, logo.buffer, 'image/webp');
+    const res = await request(app).get(`/api/v1/media/${key}`);
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toBe('image/webp');
+    expect((await request(app).get('/api/v1/media/branding/logo-../../x.webp')).status).toBe(404);
+  });
+
+  it('rejects logos that are too small or not an image', async () => {
+    const tiny = await sharp({ create: { width: 30, height: 30, channels: 3, background: '#000' } }).png().toBuffer();
+    await expect(processLogo(tiny)).rejects.toThrow(/at least 48 pixels/);
+    await expect(processLogo(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>'))).rejects.toThrow();
   });
 
   it('deletes photos from MongoDB when they are removed, without touching R2', async () => {

@@ -125,7 +125,8 @@ const enquiries: Enquiry[] = [
 
 let settings: AdminSettings = {
   dealershipName: 'Goddel Motors',
-  tagline: 'Perfect ride, just for you.',
+  motto: 'Trust In Every Drive',
+  logoIncludesName: false,
   phone: '+233 20 000 0000',
   additionalPhones: [],
   whatsapp: '+233 20 000 0000',
@@ -456,10 +457,24 @@ export async function handle(path: string, opts: Opts): Promise<unknown> {
 
   if (r[0] === 'settings') {
     requirePerm('settings:manage');
+    if (r[1] === 'logo') {
+      if (method === 'PUT') {
+        const file = opts.formData?.get('logo');
+        if (!(file instanceof File)) throw new ApiError(400, 'bad_request', 'Choose a logo image to upload.');
+        settings = { ...settings, logoUrl: URL.createObjectURL(file) };
+        log('settings.logo.upload', 'Uploaded a new logo');
+      } else if (method === 'DELETE') {
+        settings = { ...settings, logoUrl: undefined, logoIncludesName: false };
+        log('settings.logo.delete', 'Removed the custom logo');
+      }
+      return { ...settings, updatedAt: new Date().toISOString() };
+    }
     if (method === 'PUT') {
       const rates = (body.exchangeRates as { rates: Record<string, number>; source?: string } | undefined) ?? undefined;
       settings = {
         ...(body as unknown as AdminSettings),
+        logoUrl: settings.logoUrl,
+        logoIncludesName: Boolean(settings.logoUrl && body.logoIncludesName),
         exchangeRates: rates ? { base: body.defaultCurrency as AdminSettings['defaultCurrency'], rates: rates.rates, source: rates.source, updatedAt: new Date().toISOString() } : undefined,
         updatedAt: new Date().toISOString(),
       };

@@ -8,6 +8,7 @@ import { AnchorButton, Button } from '@/components/ui/Button';
 import { SelectField } from '@/components/ui/Field';
 import { ErrorState, PageLoader } from '@/components/ui/States';
 import { useToast } from '@/components/ui/Toast';
+import { useSettings } from '@/providers/SettingsProvider';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { useQuery } from '@/hooks/useQuery';
 import { errorMessage } from '@/lib/api';
@@ -22,6 +23,7 @@ export function EnquiryDetailPage() {
   const { id = '' } = useParams();
   const { can } = useAuth();
   const { notify } = useToast();
+  const { settings } = useSettings();
   const { data: enquiry, error, isLoading, reload, setData } = useQuery(`admin-enquiry:${id}`, (signal) => adminApi.getEnquiry(id, signal));
   const assignees = useQuery(can('enquiries:assign') ? 'assignees' : null, (signal) => adminApi.assignees(signal));
   const [note, setNote] = useState('');
@@ -59,8 +61,8 @@ export function EnquiryDetailPage() {
 
   const firstName = enquiry.name.split(' ')[0];
   const followUp = enquiry.vehicle
-    ? `Hello ${firstName}, this is Goddel Motors following up on your enquiry about the ${enquiry.vehicle.title}.`
-    : `Hello ${firstName}, this is Goddel Motors following up on your enquiry.`;
+    ? `Hello ${firstName}, this is ${settings.dealershipName} following up on your enquiry about the ${enquiry.vehicle.title}.`
+    : `Hello ${firstName}, this is ${settings.dealershipName} following up on your enquiry.`;
 
   return (
     <>

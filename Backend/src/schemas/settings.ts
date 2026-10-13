@@ -15,7 +15,8 @@ const httpsUrl = z
 export const updateSettingsSchema = z
   .object({
     dealershipName: cleanText(80).pipe(z.string().min(1)),
-    tagline: optional(200),
+    motto: optional(80),
+    logoIncludesName: z.boolean().default(false),
     phone: z
       .union([z.literal(''), z.string().trim().regex(PHONE_PATTERN, 'Enter a valid phone number.')])
       .optional()

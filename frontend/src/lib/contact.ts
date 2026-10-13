@@ -9,8 +9,12 @@ export function buildWhatsAppLink(number: string, message?: string): string {
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
 
-export function buildVehicleWhatsAppMessage(vehicleTitle: string, pageUrl: string): string {
-  return `Hello Goddel Motors, I'm interested in the ${vehicleTitle}. Is it still available?\n\n${pageUrl}`;
+export function buildVehicleWhatsAppMessage(vehicleTitle: string, pageUrl: string, businessName = 'Goddel Motors'): string {
+  return `Hello ${businessName}, I'm interested in the ${vehicleTitle}. Is it still available?\n\n${pageUrl}`;
+}
+
+export function buildGeneralWhatsAppMessage(businessName: string): string {
+  return `Hello ${businessName}, I would like to enquire about your vehicles.`;
 }
 
 export function buildTelLink(phone: string): string {

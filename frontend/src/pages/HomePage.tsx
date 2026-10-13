@@ -115,7 +115,7 @@ export function HomePage() {
         <div className="mb-8 text-center">
           <h2 id="why-title" className="section-rule text-2xl font-bold sm:text-3xl">
             <span>
-              Why Choose <span className="text-gold">Goddel Motors?</span>
+              Why Choose <span className="text-gold">{settings.dealershipName}?</span>
             </span>
           </h2>
         </div>

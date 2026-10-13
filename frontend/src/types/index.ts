@@ -141,7 +141,12 @@ export interface OpeningHoursEntry {
 
 export interface PublicSettings {
   dealershipName: string;
-  tagline?: string;
+  /** Short line shown under the logo. */
+  motto?: string;
+  /** Uploaded logo; the built-in emblem is shown when absent. */
+  logoUrl?: string;
+  /** The uploaded logo already shows the business name, so it isn't repeated beside it. */
+  logoIncludesName?: boolean;
   phone?: string;
   /** Extra numbers shown alongside the main phone. */
   additionalPhones?: string[];

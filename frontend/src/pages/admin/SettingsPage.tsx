@@ -1,12 +1,14 @@
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Save, Trash2 } from 'lucide-react';
+import { Plus, Save, Trash2, Upload } from 'lucide-react';
 import { adminApi } from '@/features/admin/api';
 import { AdminPageHeader } from '@/layouts/AdminLayout';
+import { DEFAULT_MOTTO, LogoEmblem } from '@/components/brand/Logo';
 import { Button } from '@/components/ui/Button';
-import { SelectField, TextAreaField, TextField } from '@/components/ui/Field';
+import { Checkbox, SelectField, TextAreaField, TextField } from '@/components/ui/Field';
+import { useSettings } from '@/providers/SettingsProvider';
 import { Alert, ErrorState, PageLoader } from '@/components/ui/States';
 import { useToast } from '@/components/ui/Toast';
 import { useQuery } from '@/hooks/useQuery';
@@ -26,7 +28,8 @@ const optionalHttps = z.string().trim().refine((v) => v === '' || /^https:\/\/\S
 const schema = z
   .object({
     dealershipName: z.string().trim().min(1, 'Required.').max(80),
-    tagline: z.string().trim().max(200),
+    motto: z.string().trim().max(80),
+    logoIncludesName: z.boolean(),
     phone: z.string().trim().refine((v) => v === '' || PHONE.test(v), 'Enter a valid phone number.'),
     additionalPhones: z
       .string()
@@ -63,7 +66,8 @@ function toValues(s: AdminSettings): Values {
   }
   return {
     dealershipName: s.dealershipName,
-    tagline: s.tagline ?? '',
+    motto: s.motto ?? '',
+    logoIncludesName: s.logoIncludesName ?? false,
     phone: s.phone ?? '',
     additionalPhones: (s.additionalPhones ?? []).join(', '),
     whatsapp: s.whatsapp ?? '',
@@ -110,12 +114,102 @@ function Section({ title, description, children }: { title: string; description?
 
 export function SettingsPage() {
   const { data, error, isLoading, reload, setData } = useQuery('admin-settings', (signal) => adminApi.getSettings(signal));
+  const { reload: reloadPublic } = useSettings();
   if (error) return <ErrorState error={error} onRetry={reload} title="Could not load settings" />;
   if (isLoading || !data) return <PageLoader />;
-  return <SettingsForm key={data.updatedAt ?? 'initial'} settings={data} onSaved={setData} />;
+
+  const onSaved = (next: AdminSettings) => {
+    setData(next);
+    reloadPublic();
+  };
+  // A logo change saves straight away; keeping `updatedAt` stops it resetting unsaved form edits.
+  const onLogoChange = (next: AdminSettings) => {
+    setData({ ...data, logoUrl: next.logoUrl, logoIncludesName: next.logoIncludesName });
+    reloadPublic();
+  };
+  return <SettingsForm key={data.updatedAt ?? 'initial'} settings={data} onSaved={onSaved} onLogoChange={onLogoChange} />;
 }
 
-function SettingsForm({ settings, onSaved }: { settings: AdminSettings; onSaved: (s: AdminSettings) => void }) {
+const LOGO_ACCEPT = 'image/png,image/jpeg,image/webp';
+const MAX_LOGO_MB = 5;
+
+function LogoUploader({ logoUrl, onChange }: { logoUrl?: string; onChange: (s: AdminSettings) => void }) {
+  const { notify } = useToast();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState<'upload' | 'remove' | null>(null);
+  const [confirmRemove, setConfirmRemove] = useState(false);
+
+  const onPick = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!LOGO_ACCEPT.split(',').includes(file.type)) return notify('Logos must be PNG, JPEG or WebP.', 'error');
+    if (file.size > MAX_LOGO_MB * 1024 * 1024) return notify(`The logo must be smaller than ${MAX_LOGO_MB} MB.`, 'error');
+    setBusy('upload');
+    try {
+      onChange(await adminApi.uploadLogo(file));
+      notify('Logo updated');
+    } catch (err) {
+      notify(errorMessage(err), 'error');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const remove = async () => {
+    setBusy('remove');
+    try {
+      onChange(await adminApi.deleteLogo());
+      notify('Logo removed — the standard emblem is shown again');
+      setConfirmRemove(false);
+    } catch (err) {
+      notify(errorMessage(err), 'error');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+      <div className="flex h-24 w-full shrink-0 items-center justify-center rounded-xl border border-dashed border-line-strong bg-bg p-3 sm:w-56">
+        {logoUrl ? (
+          <img src={logoUrl} alt="Current logo" className="max-h-full max-w-full object-contain" />
+        ) : (
+          <LogoEmblem className="h-14 w-auto text-brand-500" title="Standard emblem" />
+        )}
+      </div>
+      <div className="min-w-0 space-y-2">
+        <p className="text-sm text-muted">
+          {logoUrl ? 'Your uploaded logo is shown in the header, footer, admin area and sign-in page.' : 'No logo uploaded — the standard emblem is used.'} PNG with a
+          transparent background works best · up to {MAX_LOGO_MB} MB.
+        </p>
+        <input ref={inputRef} type="file" accept={LOGO_ACCEPT} className="sr-only" id="logo-upload" onChange={onPick} disabled={busy !== null} />
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" loading={busy === 'upload'} disabled={busy !== null} onClick={() => inputRef.current?.click()} leftIcon={<Upload className="h-4 w-4" aria-hidden />}>
+            {logoUrl ? 'Replace logo' : 'Upload logo'}
+          </Button>
+          {logoUrl &&
+            (confirmRemove ? (
+              <>
+                <Button variant="danger" size="sm" loading={busy === 'remove'} disabled={busy !== null} onClick={remove}>
+                  Yes, remove logo
+                </Button>
+                <Button variant="ghost" size="sm" disabled={busy !== null} onClick={() => setConfirmRemove(false)}>
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button variant="ghost" size="sm" disabled={busy !== null} onClick={() => setConfirmRemove(true)} leftIcon={<Trash2 className="h-4 w-4" aria-hidden />}>
+                Remove
+              </Button>
+            ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SettingsForm({ settings, onSaved, onLogoChange }: { settings: AdminSettings; onSaved: (s: AdminSettings) => void; onLogoChange: (s: AdminSettings) => void }) {
   const { notify } = useToast();
   const [serverError, setServerError] = useState<string | null>(null);
   const {
@@ -161,10 +255,26 @@ function SettingsForm({ settings, onSaved }: { settings: AdminSettings; onSaved:
       )}
 
       <div className="space-y-5">
-        <Section title="Business & contact" description="Leave a field blank to hide it on the website.">
+        <Section title="Branding" description="Your logo, business name and motto appear in the header, footer, admin area and messages to customers.">
+          <LogoUploader logoUrl={settings.logoUrl} onChange={onLogoChange} />
           <div className="grid gap-4 sm:grid-cols-2">
-            <TextField label="Dealership name" required error={errors.dealershipName?.message} {...register('dealershipName')} />
-            <TextField label="Tagline" error={errors.tagline?.message} {...register('tagline')} />
+            <TextField label="Business name" required error={errors.dealershipName?.message} {...register('dealershipName')} />
+            <TextField
+              label="Motto"
+              placeholder={DEFAULT_MOTTO}
+              hint={`Shown under the logo. Leave blank to use “${DEFAULT_MOTTO}”.`}
+              maxLength={80}
+              error={errors.motto?.message}
+              {...register('motto')}
+            />
+          </div>
+          {settings.logoUrl && (
+            <Checkbox label="My logo already shows the business name — don't repeat the name beside it" {...register('logoIncludesName')} />
+          )}
+        </Section>
+
+        <Section title="Contact details" description="Leave a field blank to hide it on the website.">
+          <div className="grid gap-4 sm:grid-cols-2">
             <TextField label="Phone" type="tel" placeholder="+233 …" error={errors.phone?.message} {...register('phone')} />
             <TextField
               label="Other phone numbers"

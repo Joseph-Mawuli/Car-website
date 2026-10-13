@@ -2,7 +2,7 @@ import { ArrowRight } from 'lucide-react';
 import { ButtonLink } from '@/components/ui/Button';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { useSettings } from '@/providers/SettingsProvider';
-import { buildWhatsAppLink } from '@/lib/contact';
+import { buildGeneralWhatsAppMessage, buildWhatsAppLink } from '@/lib/contact';
 
 export function Hero() {
   const { settings } = useSettings();
@@ -49,7 +49,7 @@ export function Hero() {
         </div>
         {settings.whatsapp && (
           <a
-            href={buildWhatsAppLink(settings.whatsapp, 'Hello Goddel Motors, I would like to enquire about your vehicles.')}
+            href={buildWhatsAppLink(settings.whatsapp, buildGeneralWhatsAppMessage(settings.dealershipName))}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-5 inline-flex min-h-10 w-fit items-center gap-2 text-sm font-semibold text-white/70 transition-colors hover:text-brand-300"

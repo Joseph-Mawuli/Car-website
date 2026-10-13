@@ -2,7 +2,7 @@ import { Mail, Phone } from 'lucide-react';
 import { AnchorButton, ButtonLink } from '@/components/ui/Button';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { useSettings } from '@/providers/SettingsProvider';
-import { buildTelLink, buildWhatsAppLink } from '@/lib/contact';
+import { buildTelLink, buildGeneralWhatsAppMessage, buildWhatsAppLink } from '@/lib/contact';
 
 export function ContactBand({ title = 'Get in touch', body = 'Have a question about a vehicle or want to arrange a viewing? Reach us directly.' }: { title?: string; body?: string }) {
   const { settings } = useSettings();
@@ -26,7 +26,7 @@ export function ContactBand({ title = 'Get in touch', body = 'Have a question ab
           </ButtonLink>
           {settings.whatsapp && (
             <AnchorButton
-              href={buildWhatsAppLink(settings.whatsapp, 'Hello Goddel Motors, I would like to enquire about your vehicles.')}
+              href={buildWhatsAppLink(settings.whatsapp, buildGeneralWhatsAppMessage(settings.dealershipName))}
               target="_blank"
               rel="noopener noreferrer"
               variant="whatsapp"
