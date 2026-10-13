@@ -5,6 +5,7 @@
  * (see main.tsx) and provides no security — the real backend enforces everything.
  */
 import { ApiError, type RequestOptions } from '@/lib/api';
+import { DEFAULT_WHY_CHOOSE_US } from '@/lib/whyChooseUs';
 import type {
   AdminSettings,
   AdminVehicle,
@@ -141,7 +142,7 @@ let settings: AdminSettings = {
   supportedCurrencies: [...CURRENCIES],
   exchangeRateMode: 'live',
   exchangeRates: { base: 'GHS', rates: { USD: 0.0667 }, updatedAt: iso(DAY), source: 'Sample rate for preview only' },
-  whyChooseUs: [],
+  whyChooseUs: DEFAULT_WHY_CHOOSE_US.map((item) => ({ ...item })),
   updatedAt: iso(DAY),
 };
 

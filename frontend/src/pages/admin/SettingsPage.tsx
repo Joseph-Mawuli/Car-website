@@ -104,7 +104,7 @@ function toPayload(v: Values): Record<string, unknown> {
 
 function Section({ title, description, children }: { title: string; description?: ReactNode; children: ReactNode }) {
   return (
-    <section className="card p-5 sm:p-6">
+    <section className="card p-4 sm:p-6">
       <h2 className="text-lg font-semibold">{title}</h2>
       {description && <p className="mt-1 text-sm text-muted">{description}</p>}
       <div className="mt-5 space-y-4">{children}</div>
@@ -398,18 +398,27 @@ function SettingsForm({ settings, onSaved, onLogoChange }: { settings: AdminSett
 
         <Section title="About page" description="Only include facts about the business you can stand behind.">
           <TextField label="Heading" error={errors.aboutHeading?.message} {...register('aboutHeading')} />
-          <TextAreaField label="Body" rows={6} hint="Separate paragraphs with a blank line." error={errors.aboutBody?.message} {...register('aboutBody')} />
+          <TextAreaField label="Body" rows={6} className="min-h-40 field-sizing-content" hint="Separate paragraphs with a blank line." error={errors.aboutBody?.message} {...register('aboutBody')} />
         </Section>
 
         <Section title="Why choose us" description="Shown on the homepage. Up to 6 points.">
           {why.fields.map((f, i) => (
-            <div key={f.id} className="rounded-xl border border-line p-4">
-              <div className="grid gap-3 sm:grid-cols-[1fr_2fr_auto] sm:items-start">
-                <TextField label="Title" error={errors.whyChooseUs?.[i]?.title?.message} {...register(`whyChooseUs.${i}.title`)} />
-                <TextAreaField label="Description" rows={2} error={errors.whyChooseUs?.[i]?.body?.message} {...register(`whyChooseUs.${i}.body`)} />
-                <Button variant="ghost" size="icon" aria-label={`Remove point ${i + 1}`} onClick={() => why.remove(i)} className="sm:mt-7">
+            <div key={f.id} className="border-t border-line pt-4 first:border-t-0 first:pt-0">
+              <div className="mb-1 flex items-center justify-between">
+                <p className="text-sm font-semibold text-brand-500">Point {i + 1}</p>
+                <Button variant="ghost" size="icon" aria-label={`Remove point ${i + 1}`} onClick={() => why.remove(i)} className="-mr-2">
                   <Trash2 className="h-4 w-4" aria-hidden />
                 </Button>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-[1fr_2fr] sm:items-start">
+                <TextField label="Title" error={errors.whyChooseUs?.[i]?.title?.message} {...register(`whyChooseUs.${i}.title`)} />
+                <TextAreaField
+                  label="Description"
+                  rows={3}
+                  className="min-h-24 resize-none field-sizing-content"
+                  error={errors.whyChooseUs?.[i]?.body?.message}
+                  {...register(`whyChooseUs.${i}.body`)}
+                />
               </div>
             </div>
           ))}
