@@ -176,22 +176,24 @@ export function InventoryPage() {
           {/* Mobile cards */}
           <ul className="space-y-3 md:hidden">
             {data.items.map((v) => (
-              <li key={v.id} className="card flex gap-3 p-3">
-                <Link to={`/admin/inventory/${v.id}`} className="h-20 w-24 shrink-0 overflow-hidden rounded-xl bg-surface-3">
-                  <VehicleImage image={v.images[0]} alt={v.title} sizes="96px" />
-                </Link>
-                <div className="min-w-0 flex-1">
-                  <Link to={`/admin/inventory/${v.id}`} className="block truncate font-semibold">
-                    {v.title}
+              <li key={v.id} className="card p-3">
+                <div className="flex gap-3">
+                  <Link to={`/admin/inventory/${v.id}`} className="h-20 w-24 shrink-0 overflow-hidden rounded-xl bg-surface-3">
+                    <VehicleImage image={v.images[0]} alt={v.title} sizes="96px" />
                   </Link>
-                  <p className="text-sm font-bold text-brand-600 dark:text-brand-400">{formatPrice(v.price, v.currency)}</p>
-                  <div className="mt-1.5 flex flex-wrap gap-1">
-                    <AvailabilityBadge status={v.availabilityStatus} />
-                    {v.visibility !== 'published' && <VisibilityBadge visibility={v.visibility} />}
-                    {v.isDemo && <Badge tone="amber">Demo</Badge>}
+                  <div className="min-w-0 flex-1">
+                    <Link to={`/admin/inventory/${v.id}`} className="line-clamp-2 font-semibold leading-snug">
+                      {v.title}
+                    </Link>
+                    <p className="mt-0.5 whitespace-nowrap text-sm font-bold text-brand-600 dark:text-brand-400">{formatPrice(v.price, v.currency)}</p>
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      <AvailabilityBadge status={v.availabilityStatus} />
+                      {v.visibility !== 'published' && <VisibilityBadge visibility={v.visibility} />}
+                      {v.isDemo && <Badge tone="amber">Demo</Badge>}
+                    </div>
                   </div>
                 </div>
-                <div className="-mr-1 flex flex-col">{rowActions(v)}</div>
+                <div className="-mb-1 mt-2 border-t border-line pt-1">{rowActions(v)}</div>
               </li>
             ))}
           </ul>

@@ -36,6 +36,8 @@ export function Dialog({
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
+  useViewportBottomInset();
+
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -51,13 +53,12 @@ export function Dialog({
   }, [open]);
 
   const layout = {
-    sheet:
-      'm-0 mt-auto w-full max-w-none rounded-t-3xl sm:m-auto sm:max-w-lg sm:rounded-2xl max-h-[92dvh] backdrop:bg-black/60',
+    sheet: 'dialog-sheet backdrop:bg-black/60',
     drawer: cn(
-      'm-0 h-dvh max-h-none w-[min(88vw,380px)] max-w-none backdrop:bg-black/60',
+      'm-0 h-[calc(100dvh-var(--vv-bottom))] max-h-none w-[min(88vw,380px)] max-w-none overflow-hidden backdrop:bg-black/60',
       side === 'right' ? 'ml-auto rounded-l-2xl' : 'mr-auto rounded-r-2xl',
     ),
-    fullscreen: 'm-0 h-dvh max-h-none w-screen max-w-none bg-ink-950 text-white backdrop:bg-black',
+    fullscreen: 'm-0 h-[calc(100dvh-var(--vv-bottom))] max-h-none w-screen max-w-none overflow-hidden bg-ink-950 text-white backdrop:bg-black',
   }[variant];
 
   return (
@@ -73,14 +74,15 @@ export function Dialog({
       }}
       aria-labelledby={titleId}
       className={cn(
-        'border border-line bg-surface p-0 text-fg shadow-2xl backdrop:backdrop-blur-[2px] open:flex open:flex-col',
+        'border border-line bg-surface p-0 text-fg shadow-2xl backdrop:backdrop-blur-[2px]',
+        variant === 'sheet' ? 'open:block' : 'open:flex open:flex-col',
         layout,
         className,
       )}
     >
       {open && (
         <>
-          <div className={cn('flex items-start gap-3 px-5 pt-5', hideTitle && 'sr-only')}>
+          <div className={cn('sticky top-0 z-10 flex shrink-0 items-start gap-3 bg-inherit px-5 pt-5', hideTitle && 'sr-only')}>
             <div className="min-w-0 flex-1">
               <h2 id={titleId} className="text-lg font-semibold">
                 {title}
@@ -91,12 +93,34 @@ export function Dialog({
               <X className="h-5 w-5" aria-hidden />
             </Button>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
-          {footer && <div className="flex flex-wrap justify-end gap-2 border-t border-line px-5 py-4">{footer}</div>}
+          <div className={cn('px-5 py-4', variant !== 'sheet' && 'min-h-0 flex-1 overflow-y-auto')}>{children}</div>
+          {footer && (
+            <div className="sticky bottom-0 flex shrink-0 flex-wrap justify-end gap-2 border-t border-line bg-inherit px-5 py-4">{footer}</div>
+          )}
         </>
       )}
     </dialog>
   );
+}
+
+/** Tracks the strip covered by the mobile browser bar or keyboard. */
+function useViewportBottomInset() {
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const sync = () => {
+      if (vv.height <= 0) return;
+      const bottom = Math.max(0, Math.round(window.innerHeight - vv.offsetTop - vv.height));
+      document.documentElement.style.setProperty('--vv-bottom', `${bottom}px`);
+    };
+    sync();
+    vv.addEventListener('resize', sync);
+    vv.addEventListener('scroll', sync);
+    return () => {
+      vv.removeEventListener('resize', sync);
+      vv.removeEventListener('scroll', sync);
+    };
+  }, []);
 }
 
 interface ConfirmDialogProps {
