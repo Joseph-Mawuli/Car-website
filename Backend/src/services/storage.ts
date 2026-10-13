@@ -88,6 +88,7 @@ export class MongoStorage implements ObjectStorage {
 
   async put(key: string, body: Buffer, contentType: string): Promise<void> {
     const bucket = this.bucket();
+    this.forget(key);
     for (const existing of await bucket.find({ filename: key }, { projection: { _id: 1 } }).toArray()) {
       await bucket.delete(existing._id);
     }
@@ -101,6 +102,7 @@ export class MongoStorage implements ObjectStorage {
 
   async deleteMany(keys: string[]): Promise<{ failed: string[] }> {
     if (keys.length === 0) return { failed: [] };
+    for (const key of keys) this.forget(key);
     const failed: string[] = [];
     let bucket: GridFSBucket;
     try {
@@ -127,14 +129,63 @@ export class MongoStorage implements ObjectStorage {
     return mongoMediaUrl(key);
   }
 
-  /** Returns the stored file's details and a stream of its bytes, or null when it doesn't exist. */
-  async open(key: string): Promise<{ contentType: string; length: number; stream: Readable } | null> {
+  /**
+   * Keys are unique per upload, so a stored photo never changes and can be kept in memory.
+   * Without this every view costs several database round trips.
+   */
+  private cache = new Map<string, StoredFile>();
+  private cachedBytes = 0;
+
+  private remember(key: string, file: StoredFile) {
+    if (file.data.length > MEDIA_CACHE_MAX_FILE_BYTES) return;
+    this.cache.set(key, file);
+    this.cachedBytes += file.data.length;
+    for (const [oldKey, old] of this.cache) {
+      if (this.cachedBytes <= MEDIA_CACHE_MAX_BYTES) break;
+      this.cache.delete(oldKey);
+      this.cachedBytes -= old.data.length;
+    }
+  }
+
+  private forget(key: string) {
+    const old = this.cache.get(key);
+    if (!old) return;
+    this.cache.delete(key);
+    this.cachedBytes -= old.data.length;
+  }
+
+  /** Returns the stored file, or null when it doesn't exist. */
+  async open(key: string): Promise<StoredFile | null> {
+    const hit = this.cache.get(key);
+    if (hit) {
+      // Re-insert so the Map's insertion order tracks recent use.
+      this.cache.delete(key);
+      this.cache.set(key, hit);
+      return hit;
+    }
     const bucket = this.bucket();
     const file = await bucket.find({ filename: key }).sort({ uploadDate: -1 }).limit(1).next();
     if (!file) return null;
     const contentType = typeof file.metadata?.contentType === 'string' ? file.metadata.contentType : 'application/octet-stream';
-    return { contentType, length: file.length, stream: bucket.openDownloadStream(file._id) };
+    const data = await streamToBuffer(bucket.openDownloadStream(file._id));
+    const stored = { contentType, data };
+    this.remember(key, stored);
+    return stored;
   }
+}
+
+export interface StoredFile {
+  contentType: string;
+  data: Buffer;
+}
+
+const MEDIA_CACHE_MAX_BYTES = 64 * 1024 * 1024;
+const MEDIA_CACHE_MAX_FILE_BYTES = 8 * 1024 * 1024;
+
+async function streamToBuffer(stream: Readable): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) chunks.push(chunk as Buffer);
+  return Buffer.concat(chunks);
 }
 
 const instances: Partial<Record<StorageSource, ObjectStorage>> = {};

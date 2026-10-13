@@ -58,8 +58,20 @@ describe('MongoDB photo storage (GridFS)', { timeout: 30_000 }, () => {
 
   it('replaces a file stored under the same key instead of keeping duplicates', async () => {
     await storage.put(`${FOLDER}/480.webp`, Buffer.from('first'), 'image/webp');
+    expect((await storage.open(`${FOLDER}/480.webp`))?.data.toString()).toBe('first');
     await storage.put(`${FOLDER}/480.webp`, Buffer.from('second'), 'image/webp');
     expect(await files().countDocuments({ filename: `${FOLDER}/480.webp` })).toBe(1);
+    expect((await storage.open(`${FOLDER}/480.webp`))?.data.toString()).toBe('second');
+  });
+
+  it('serves repeat requests from memory and stops serving a photo once it is deleted', async () => {
+    const key = `${FOLDER}/960.webp`;
+    await storage.put(key, Buffer.from('cached'), 'image/webp');
+    expect((await storage.open(key))?.data.toString()).toBe('cached');
+    await files().deleteMany({});
+    expect((await storage.open(key))?.data.toString()).toBe('cached');
+    await storage.deleteMany([key]);
+    expect(await storage.open(key)).toBeNull();
   });
 
   it('returns 404 for unknown photos and for paths the upload pipeline never creates', async () => {
@@ -82,6 +94,21 @@ describe('MongoDB photo storage (GridFS)', { timeout: 30_000 }, () => {
     });
     expect(img.url).toBe(`http://localhost:4000/api/v1/media/${FOLDER}/original.jpg`);
     expect(img.variants.thumb?.url).toBe(`http://localhost:4000/api/v1/media/${FOLDER}/480.webp`);
+  });
+
+  it('builds demo photo links from the current website URL', () => {
+    const img = serializeImage({
+      _id: new mongoose.Types.ObjectId(),
+      key: 'static/demo/demo-suv-1600.webp',
+      url: 'http://old-site:5173/images/vehicles/demo/demo-suv-1600.webp',
+      alt: '',
+      sortOrder: 0,
+      variants: { thumb: { key: 'static/demo/demo-suv-480.webp', url: 'http://old-site:5173/x.webp', width: 480, height: 360 } },
+      source: 'static',
+      uploadedAt: new Date(),
+    });
+    expect(img.url).toBe('http://localhost:5173/images/vehicles/demo/demo-suv-1600.webp');
+    expect(img.variants.thumb?.url).toBe('http://localhost:5173/images/vehicles/demo/demo-suv-480.webp');
   });
 
   it('deletes photos from MongoDB when they are removed, without touching R2', async () => {

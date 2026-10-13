@@ -1,5 +1,4 @@
 import type { Request, Response } from 'express';
-import { logger } from '../config/logger.js';
 import { getStorage, MongoStorage } from '../services/storage.js';
 
 /** Only keys produced by the upload pipeline can be requested. */
@@ -23,14 +22,8 @@ export async function getMedia(req: Request, res: Response) {
 
   res.set({
     'Content-Type': file.contentType,
-    'Content-Length': String(file.length),
     // Keys are unique per upload, so a stored photo never changes.
     'Cache-Control': 'public, max-age=31536000, immutable',
   });
-  file.stream.on('error', (error) => {
-    logger.warn('Failed to stream stored photo', { key, error });
-    if (!res.headersSent) notFound(res);
-    else res.destroy();
-  });
-  file.stream.pipe(res);
+  res.send(file.data);
 }
