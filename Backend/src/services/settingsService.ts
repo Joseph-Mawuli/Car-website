@@ -72,7 +72,7 @@ function logoUrl(logo: SiteLogoRecord): string {
 function serializeSettings(s: SiteSettingsRecord) {
   return {
     dealershipName: s.dealershipName,
-    motto: s.motto,
+    motto: s.motto ?? s.tagline,
     logoUrl: s.logo ? logoUrl(s.logo) : undefined,
     logoIncludesName: Boolean(s.logo && s.logoIncludesName),
     phone: s.phone,
