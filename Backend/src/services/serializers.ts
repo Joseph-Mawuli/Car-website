@@ -3,26 +3,35 @@ import type { VehicleImageRecord, VehicleRecord } from '../models/Vehicle.js';
 import type { EnquiryRecord } from '../models/Enquiry.js';
 import type { StaffRecord } from '../models/Staff.js';
 import { vehicleTitle } from '../lib/text.js';
+import { mongoMediaUrl } from './storage.js';
 
 type WithId<T> = T & { _id: Types.ObjectId };
 
-function variant(v?: { url: string; width: number; height: number }) {
-  return v ? { url: v.url, width: v.width, height: v.height } : undefined;
+/**
+ * Photos in MongoDB are served by this API, so their links are rebuilt from the key with the
+ * current PUBLIC_API_URL — a stored link would point at whichever host did the upload.
+ */
+function imageUrl(img: Pick<VehicleImageRecord, 'source'>, file: { key: string; url: string }): string {
+  return img.source === 'mongodb' ? mongoMediaUrl(file.key) : file.url;
+}
+
+function variant(img: VehicleImageRecord, v?: { key: string; url: string; width: number; height: number }) {
+  return v ? { url: imageUrl(img, v), width: v.width, height: v.height } : undefined;
 }
 
 /** Storage object keys are internal and deliberately omitted from responses. */
 export function serializeImage(img: VehicleImageRecord) {
   return {
     id: img._id.toString(),
-    url: img.url,
+    url: imageUrl(img, img),
     alt: img.alt ?? '',
     sortOrder: img.sortOrder,
     width: img.width,
     height: img.height,
     variants: {
-      thumb: variant(img.variants?.thumb),
-      medium: variant(img.variants?.medium),
-      large: variant(img.variants?.large),
+      thumb: variant(img, img.variants?.thumb),
+      medium: variant(img, img.variants?.medium),
+      large: variant(img, img.variants?.large),
     },
     mimeType: img.mimeType,
     size: img.size,

@@ -69,6 +69,10 @@ class R2Storage implements ObjectStorage {
 
 export const MEDIA_ROUTE_PREFIX = '/api/v1/media';
 
+export function mongoMediaUrl(key: string): string {
+  return `${publicApiUrl}${MEDIA_ROUTE_PREFIX}/${key}`;
+}
+
 /**
  * Photos stored in MongoDB GridFS and served by this API at `/api/v1/media/<key>`.
  * Uses the existing database connection, so it works wherever the database does.
@@ -120,7 +124,7 @@ export class MongoStorage implements ObjectStorage {
   }
 
   publicUrl(key: string): string {
-    return `${publicApiUrl}${MEDIA_ROUTE_PREFIX}/${key}`;
+    return mongoMediaUrl(key);
   }
 
   /** Returns the stored file's details and a stream of its bytes, or null when it doesn't exist. */

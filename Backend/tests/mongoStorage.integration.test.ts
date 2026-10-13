@@ -6,6 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { getStorage, MongoStorage } from '../src/services/storage.js';
 import { deleteStoredImages, processImage } from '../src/services/imageService.js';
 import { PendingDeletion } from '../src/models/PendingDeletion.js';
+import { serializeImage } from '../src/services/serializers.js';
 import { buildTestApp } from './helpers.js';
 
 let mongo: MongoMemoryServer;
@@ -66,6 +67,21 @@ describe('MongoDB photo storage (GridFS)', { timeout: 30_000 }, () => {
     for (const path of ['vehicles/../../etc/passwd', `${FOLDER}/original.png`, 'staff/secret.json', `${FOLDER}/960.webp/extra`]) {
       expect((await request(app).get(`/api/v1/media/${path}`)).status).toBe(404);
     }
+  });
+
+  it('builds photo links from the current API URL, not the link saved at upload time', () => {
+    const img = serializeImage({
+      _id: new mongoose.Types.ObjectId(),
+      key: `${FOLDER}/original.jpg`,
+      url: 'http://some-old-host:4000/api/v1/media/old.jpg',
+      alt: '',
+      sortOrder: 0,
+      variants: { thumb: { key: `${FOLDER}/480.webp`, url: 'http://some-old-host:4000/x.webp', width: 480, height: 320 } },
+      source: 'mongodb',
+      uploadedAt: new Date(),
+    });
+    expect(img.url).toBe(`http://localhost:4000/api/v1/media/${FOLDER}/original.jpg`);
+    expect(img.variants.thumb?.url).toBe(`http://localhost:4000/api/v1/media/${FOLDER}/480.webp`);
   });
 
   it('deletes photos from MongoDB when they are removed, without touching R2', async () => {
