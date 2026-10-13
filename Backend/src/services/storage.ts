@@ -115,12 +115,16 @@ export class MongoStorage implements ObjectStorage {
       .toArray()
       .catch(() => null);
     if (!files) return { failed: [...keys] };
-    for (const file of files) {
-      try {
-        await bucket.delete(file._id);
-      } catch {
-        failed.push(file.filename);
-      }
+    if (files.length === 0) return { failed };
+    // Two bulk deletes instead of two round trips per file. Chunks go first so a failure
+    // leaves the file record in place and the retry job can still find it.
+    const db = mongoose.connection.db!;
+    const ids = files.map((f) => f._id);
+    try {
+      await db.collection('vehicleImages.chunks').deleteMany({ files_id: { $in: ids } });
+      await db.collection('vehicleImages.files').deleteMany({ _id: { $in: ids } });
+    } catch {
+      failed.push(...files.map((f) => f.filename));
     }
     return { failed };
   }

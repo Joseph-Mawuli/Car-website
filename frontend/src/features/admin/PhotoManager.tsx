@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { ArrowLeft, ArrowRight, ImagePlus, RefreshCw, Star, Trash2, UploadCloud } from 'lucide-react';
 import { adminApi } from './api';
 import type { VehicleImage as VehicleImageRecord } from '@/types';
@@ -29,6 +29,10 @@ export function PhotoManager({ vehicleId, vehicleTitle, images, onChange, readOn
   const [busyId, setBusyId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<VehicleImageRecord | null>(null);
   const sorted = [...images].sort((a, b) => a.sortOrder - b.sortOrder);
+  const latestImages = useRef(images);
+  useEffect(() => {
+    latestImages.current = images;
+  }, [images]);
 
   const upload = async (files: File[]) => {
     setError(null);
@@ -96,17 +100,17 @@ export function PhotoManager({ vehicleId, vehicleTitle, images, onChange, readOn
   };
 
   const remove = async () => {
-    if (!confirmDelete) return;
-    setBusyId(confirmDelete.id);
+    const img = confirmDelete;
+    if (!img) return;
+    setConfirmDelete(null);
+    onChange(images.filter((i) => i.id !== img.id));
     try {
-      await adminApi.deleteImage(vehicleId, confirmDelete.id);
-      onChange(images.filter((i) => i.id !== confirmDelete.id));
+      await adminApi.deleteImage(vehicleId, img.id);
       notify('Photo deleted');
-      setConfirmDelete(null);
     } catch (err) {
-      notify(errorMessage(err), 'error');
-    } finally {
-      setBusyId(null);
+      // Other photos may have been deleted meanwhile, so put back only this one.
+      if (!latestImages.current.some((i) => i.id === img.id)) onChange([...latestImages.current, img]);
+      notify(`Couldn't delete the photo: ${errorMessage(err)}`, 'error');
     }
   };
 
@@ -234,7 +238,6 @@ export function PhotoManager({ vehicleId, vehicleTitle, images, onChange, readOn
         title="Delete this photo?"
         description="The photo will be removed from the listing and deleted from storage. This cannot be undone."
         confirmLabel="Delete photo"
-        loading={busyId !== null}
         onConfirm={remove}
         onCancel={() => setConfirmDelete(null)}
       />

@@ -107,6 +107,14 @@ export async function deleteStoredImages(images: Pick<VehicleImageRecord, 'key' 
   }
 }
 
+/**
+ * Same as `deleteStoredImages` but doesn't make the caller wait: the photo is already gone
+ * from the listing, and anything that fails to delete is queued for the retry job.
+ */
+export function deleteStoredImagesLater(images: Pick<VehicleImageRecord, 'key' | 'variants' | 'source'>[], reason: string): void {
+  void deleteStoredImages(images, reason).catch((error) => logger.error('Background image deletion failed', { error, reason }));
+}
+
 /** Deletes objects from storage; failures are queued for retry rather than silently orphaned. */
 async function deleteKeys(keys: string[], reason: string, source: StorageSource): Promise<void> {
   if (keys.length === 0) return;
@@ -244,7 +252,7 @@ export async function replaceVehicleImage(vehicleId: string, imageId: string, fi
     await deleteKeys(stored.uploaded, 'replace rollback', stored.source);
     throw notFound('Photo was removed while uploading.');
   }
-  await deleteStoredImages([old], `image ${imageId} replaced`);
+  deleteStoredImagesLater([old], `image ${imageId} replaced`);
   const img = updated.images.find((i) => i._id.toString() === imageId)!;
   return serializeImage(img);
 }
@@ -257,7 +265,7 @@ export async function deleteVehicleImage(vehicleId: string, imageId: string, act
   ).lean();
   if (!before) throw notFound('Photo not found.');
   const removed = before.images.find((i) => i._id.toString() === imageId);
-  if (removed) await deleteStoredImages([removed], `image ${imageId} deleted`);
+  if (removed) deleteStoredImagesLater([removed], `image ${imageId} deleted`);
 }
 
 export async function reorderVehicleImages(vehicleId: string, imageIds: string[], actor: StaffPrincipal) {

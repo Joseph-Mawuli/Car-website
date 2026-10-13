@@ -75,6 +75,20 @@ describe('MongoDB photo storage (GridFS)', { timeout: 30_000 }, () => {
     expect(await storage.open(key)).toBeNull();
   });
 
+  it('deletes every size of a photo, including its data chunks, and leaves other photos alone', async () => {
+    const keys = ['original.jpg', '480.webp', '960.webp', '1600.webp'].map((n) => `${FOLDER}/${n}`);
+    const other = 'vehicles/64c000000000000000000002/2b4e28ba-2fa1-11d2-883f-0016d3cca427/960.webp';
+    for (const key of [...keys, other]) await storage.put(key, Buffer.alloc(300_000, 1), 'image/webp');
+    const chunks = mongoose.connection.db!.collection('vehicleImages.chunks');
+    const otherFile = await files().findOne({ filename: other });
+
+    expect(await storage.deleteMany(keys)).toEqual({ failed: [] });
+    expect(await files().countDocuments({ filename: { $in: keys } })).toBe(0);
+    expect(await chunks.countDocuments({ files_id: { $ne: otherFile!._id } })).toBe(0);
+    expect(await chunks.countDocuments({ files_id: otherFile!._id })).toBeGreaterThan(0);
+    expect((await storage.open(other))?.data.length).toBe(300_000);
+  });
+
   it('returns 404 for unknown photos and for paths the upload pipeline never creates', async () => {
     expect((await request(app).get(`/api/v1/media/${FOLDER}/1600.webp`)).status).toBe(404);
     for (const path of ['vehicles/../../etc/passwd', `${FOLDER}/original.png`, 'staff/secret.json', `${FOLDER}/960.webp/extra`]) {
