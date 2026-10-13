@@ -22,12 +22,21 @@ async function main() {
 
   const server = app.listen(env.PORT, () => logger.info(`Goddel Motors API listening on port ${env.PORT}`));
 
-  try {
-    await connectDatabase();
-    void getLiveRates((await getSettingsRecord()).defaultCurrency);
-  } catch (error) {
-    logger.error('Could not connect to MongoDB. The API will respond with 503 until the database is reachable.', { error });
-  }
+  // Keep retrying: a database that is unreachable at boot (e.g. IP allowlist not yet updated) must not
+  // leave the API disconnected until someone restarts it.
+  const connectWithRetry = async (attempt = 1): Promise<void> => {
+    try {
+      await connectDatabase();
+      void getLiveRates((await getSettingsRecord()).defaultCurrency);
+    } catch (error) {
+      const delayMs = Math.min(60_000, 5_000 * attempt);
+      logger.error(`Could not connect to MongoDB (attempt ${attempt}); retrying in ${delayMs / 1000}s. The API responds with 503 until then.`, {
+        error,
+      });
+      setTimeout(() => void connectWithRetry(attempt + 1), delayMs).unref();
+    }
+  };
+  await connectWithRetry();
 
   const shutdown = (signal: string) => {
     logger.info(`Received ${signal}, shutting down`);
