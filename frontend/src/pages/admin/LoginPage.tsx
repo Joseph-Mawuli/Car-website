@@ -5,7 +5,6 @@ import { LogoBadge } from '@/components/brand/Logo';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/Field';
 import { Alert, PageLoader } from '@/components/ui/States';
-import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { useAuth } from '@/features/admin/AuthProvider';
 import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 import { ROLE_LABELS } from '@/lib/labels';
@@ -60,14 +59,10 @@ export function LoginPage() {
 
   return (
     <div className="relative isolate flex min-h-dvh items-center justify-center overflow-hidden bg-ink-950 px-4 py-10">
-      <img src="/images/goddel-hero-1600.jpg" alt="" className="absolute inset-0 -z-10 h-full w-full object-cover object-[70%_center] opacity-30" />
+      <img src="/images/goddel-hero-1600.jpg" alt="" className="hero-photo absolute inset-0 -z-10 h-full w-full object-cover object-[70%_center] opacity-30" />
       <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-b from-ink-950/70 via-ink-950/85 to-ink-950" />
-      <div className="absolute right-3 top-3 text-white [&_button]:text-white/80 [&_button:hover]:bg-white/10">
-        <ThemeToggle />
-      </div>
-
       <div className="w-full max-w-md">
-        <div className="mb-6 flex justify-center text-white">
+        <div className="mb-6 flex justify-center text-brand-500">
           <LogoBadge className="h-24 w-auto" />
         </div>
         <div className="card p-6 sm:p-8">
@@ -138,7 +133,7 @@ export function LoginPage() {
                   <Button type="submit" size="lg" className="w-full" loading={submitting} leftIcon={<Lock className="h-4 w-4" aria-hidden />}>
                     Sign in
                   </Button>
-                  <button type="button" onClick={onForgot} className="mx-auto block min-h-10 text-sm font-semibold text-brand-600 hover:underline dark:text-brand-400">
+                  <button type="button" onClick={onForgot} className="mx-auto block min-h-10 text-sm font-semibold text-brand-500 hover:text-brand-300 hover:underline">
                     Forgot password?
                   </button>
                 </form>

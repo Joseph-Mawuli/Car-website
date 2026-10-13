@@ -53,7 +53,7 @@ function LogoEmblemPaths() {
     <g fill="currentColor">
       {/* Speedometer arc, needle, then the car silhouette strokes */}
       <path d="M26 58 A34 34 0 0 1 94 58 L87 58 A27 27 0 0 0 33 58 Z" />
-      <path d="M58.6 50 L60 20 L61.4 50 Z" className="text-brand-500" fill="currentColor" />
+      <path d="M58.6 50 L60 20 L61.4 50 Z" className="text-fg" fill="currentColor" />
       <circle cx="60" cy="51" r="4.2" />
       <path d="M22 63 C36 56 50 53.5 63 55 C73 56.2 80 60.5 87 61.6 C96 62.8 104 63.4 107 66 L103.5 66.2 C97 64.8 90 64.6 82.5 64.4 C75 64 70 60.4 62 58.9 C49 56.8 36 58.6 22 63 Z" />
       <path d="M8 66.5 C25 63 43 63.6 60 67 C43 67.2 27 68.6 8 66.5 Z" />
@@ -67,17 +67,17 @@ function LogoEmblemPaths() {
 export const BRAND_SLOGAN = 'Perfect ride, just for you';
 
 /** Header lockup: emblem + stacked wordmark + slogan. */
-export function Logo({ className, inverted = false, showSlogan = true }: { className?: string; inverted?: boolean; showSlogan?: boolean }) {
+export function Logo({ className, showSlogan = true }: { className?: string; showSlogan?: boolean }) {
   return (
-    <span className={cn('inline-flex items-center gap-2', inverted ? 'text-white' : 'text-fg', className)}>
+    <span className={cn('inline-flex items-center gap-2 text-brand-500', className)}>
       <LogoEmblem className="h-8 w-auto shrink-0 sm:h-9" />
       <span className="flex flex-col font-display leading-none">
         <span className="text-[15px] font-extrabold tracking-[0.14em] sm:text-base">GODDEL</span>
-        <span className="mt-0.5 text-[10px] font-semibold tracking-[0.42em] text-brand-600 dark:text-brand-400 sm:text-[11px]">
+        <span className="mt-0.5 text-[10px] font-semibold tracking-[0.42em] text-brand-300 sm:text-[11px]">
           MOTORS
         </span>
         {showSlogan && (
-          <span className={cn('mt-1 whitespace-nowrap font-sans text-[9px] font-medium italic tracking-wide sm:text-[10px]', inverted ? 'text-white/70' : 'text-muted')}>
+          <span className="mt-1 whitespace-nowrap font-sans text-[9px] font-medium italic tracking-wide text-fg-soft/80 sm:text-[10px]">
             {BRAND_SLOGAN}
           </span>
         )}

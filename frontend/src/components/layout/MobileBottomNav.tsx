@@ -25,7 +25,7 @@ export function MobileBottomNav() {
             key={to}
             to={to}
             end={end}
-            className={({ isActive }) => cn(itemClass, isActive ? 'text-brand-600 dark:text-brand-400' : 'text-muted')}
+            className={({ isActive }) => cn(itemClass, isActive ? 'text-brand-500' : 'text-muted')}
           >
             <Icon className="h-5 w-5" aria-hidden />
             {label}

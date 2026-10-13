@@ -6,19 +6,21 @@ import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { PreviewModeBanner } from '@/components/layout/PreviewModeBanner';
 
 export function PublicLayout() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   // Vehicle pages render their own sticky WhatsApp/Call bar on mobile.
   const onVehiclePage = useMatch('/cars/:slug');
 
   useEffect(() => {
-    window.scrollTo({ top: 0 });
-  }, [pathname]);
+    const target = hash ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
+    if (target) target.scrollIntoView();
+    else window.scrollTo({ top: 0 });
+  }, [pathname, hash]);
 
   return (
     <div className="flex min-h-dvh flex-col">
       <a
         href="#main"
-        className="sr-only z-50 rounded-lg bg-brand-500 px-4 py-2 font-semibold text-white focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+        className="sr-only z-50 rounded-lg bg-brand-500 px-4 py-2 font-semibold text-ink-950 focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
       >
         Skip to content
       </a>

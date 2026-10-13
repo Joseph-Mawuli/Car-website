@@ -7,20 +7,19 @@ export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'wha
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary:
-    'bg-brand-500 text-white shadow-primary hover:bg-brand-600 active:bg-brand-700',
+  primary: 'bg-brand-500 text-ink-950 shadow-primary hover:bg-brand-300 active:bg-brand-600',
   secondary: 'bg-surface-2 text-fg hover:bg-surface-3 border border-line',
-  outline: 'border border-line-strong bg-transparent text-fg hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400',
+  outline: 'border border-brand-500/70 bg-transparent text-fg hover:border-brand-300 hover:bg-brand-500/10 hover:text-brand-300',
   ghost: 'bg-transparent text-fg-soft hover:bg-surface-2 hover:text-fg',
   whatsapp: 'bg-whatsapp text-white hover:bg-whatsapp-dark',
   danger: 'bg-red-600 text-white hover:bg-red-700',
-  onDark: 'border border-white/25 bg-white/5 text-white backdrop-blur hover:bg-white/15',
+  onDark: 'border border-brand-500/60 bg-black/30 text-white backdrop-blur hover:border-brand-300 hover:bg-brand-500/10 hover:text-brand-300',
 };
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: 'min-h-9 px-3.5 text-sm gap-1.5 rounded-lg',
-  md: 'min-h-11 px-5 text-[15px] gap-2 rounded-xl',
-  lg: 'min-h-12 px-6 text-base gap-2 rounded-xl',
+  sm: 'min-h-9 px-4 text-sm gap-1.5 rounded-full',
+  md: 'min-h-11 px-5 text-[15px] gap-2 rounded-full',
+  lg: 'min-h-12 px-7 text-base gap-2 rounded-full',
   icon: 'h-11 w-11 rounded-xl',
 };
 

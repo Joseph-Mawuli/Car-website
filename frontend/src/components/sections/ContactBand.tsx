@@ -8,18 +8,22 @@ export function ContactBand({ title = 'Get in touch', body = 'Have a question ab
   const { settings } = useSettings();
   return (
     <section aria-labelledby="contact-band-title" className="container-page">
-      <div className="relative overflow-hidden rounded-3xl bg-ink-900 px-6 py-10 text-white sm:px-10 lg:flex lg:items-center lg:justify-between lg:gap-10">
+      <div className="relative isolate overflow-hidden rounded-3xl border border-brand-500/25 bg-ink-900 px-6 py-10 text-white sm:px-10 lg:flex lg:items-center lg:justify-between lg:gap-10">
+        <div aria-hidden className="hero-streaks pointer-events-none absolute inset-0 -z-10" />
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-brand-500/25 blur-3xl"
+          className="pointer-events-none absolute -bottom-32 -right-24 -z-10 h-80 w-80 rounded-full bg-brand-500/20 blur-3xl"
         />
         <div className="relative max-w-xl">
-          <h2 id="contact-band-title" className="text-2xl font-bold text-white sm:text-3xl">
+          <h2 id="contact-band-title" className="text-2xl font-bold text-brand-500 sm:text-3xl">
             {title}
           </h2>
-          <p className="mt-2 text-white/70">{body}</p>
+          <p className="mt-2 text-white/75">{body}</p>
         </div>
         <div className="relative mt-6 flex flex-col gap-3 whitespace-nowrap sm:flex-row sm:flex-wrap lg:mt-0 lg:shrink-0 lg:flex-nowrap">
+          <ButtonLink to="/contact" size="lg">
+            <Mail className="h-5 w-5" aria-hidden /> Enquire Now
+          </ButtonLink>
           {settings.whatsapp && (
             <AnchorButton
               href={buildWhatsAppLink(settings.whatsapp, 'Hello Goddel Motors, I would like to enquire about your vehicles.')}
@@ -36,9 +40,6 @@ export function ContactBand({ title = 'Get in touch', body = 'Have a question ab
               <Phone className="h-5 w-5" aria-hidden /> Call now
             </AnchorButton>
           )}
-          <ButtonLink to="/contact" variant={settings.whatsapp || settings.phone ? 'onDark' : 'primary'} size="lg">
-            <Mail className="h-5 w-5" aria-hidden /> Send an enquiry
-          </ButtonLink>
         </div>
       </div>
     </section>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { Clock, Mail, MapPin, Phone } from 'lucide-react';
+import { Clock, Lock, Mail, MapPin, Phone } from 'lucide-react';
 import { BRAND_SLOGAN, Logo } from '@/components/brand/Logo';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { useSettings } from '@/providers/SettingsProvider';
@@ -11,17 +11,18 @@ export function PublicFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-16 bg-ink-950 text-white/80">
+    <footer className="relative mt-16 border-t border-line bg-bg-2 text-white/80">
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-500/60 to-transparent" />
       <div className="container-page grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2 lg:col-span-1">
-          <Logo inverted showSlogan={false} />
+          <Logo showSlogan={false} />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/60">
             {settings.tagline || `${BRAND_SLOGAN}.`}
           </p>
         </div>
 
         <div>
-          <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-white">Explore</h2>
+          <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-brand-500">Explore</h2>
           <ul className="mt-4 space-y-2.5 text-sm">
             {PUBLIC_NAV.map((item) => (
               <li key={item.to}>
@@ -34,12 +35,12 @@ export function PublicFooter() {
         </div>
 
         <div>
-          <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-white">Contact</h2>
+          <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-brand-500">Contact</h2>
           <ul className="mt-4 space-y-3 text-sm">
             {allPhones(settings).map((phone) => (
               <li key={phone}>
                 <a href={buildTelLink(phone)} className="inline-flex items-center gap-2 hover:text-brand-300">
-                  <Phone className="h-4 w-4" aria-hidden /> {phone}
+                  <Phone className="h-4 w-4 text-brand-500" aria-hidden /> {phone}
                 </a>
               </li>
             ))}
@@ -58,13 +59,13 @@ export function PublicFooter() {
             {settings.email && (
               <li>
                 <a href={buildMailtoLink(settings.email)} className="inline-flex items-center gap-2 break-all hover:text-brand-300">
-                  <Mail className="h-4 w-4 shrink-0" aria-hidden /> {settings.email}
+                  <Mail className="h-4 w-4 shrink-0 text-brand-500" aria-hidden /> {settings.email}
                 </a>
               </li>
             )}
             {settings.address && (
               <li className="flex items-start gap-2">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> <span>{settings.address}</span>
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" aria-hidden /> <span>{settings.address}</span>
               </li>
             )}
             {!settings.phone && !settings.whatsapp && !settings.email && (
@@ -80,11 +81,11 @@ export function PublicFooter() {
         <div>
           {settings.openingHours.length > 0 && (
             <>
-              <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-white">Opening hours</h2>
+              <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-brand-500">Opening hours</h2>
               <ul className="mt-4 space-y-2 text-sm">
                 {settings.openingHours.map((entry) => (
                   <li key={entry.label} className="flex items-start gap-2">
-                    <Clock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                    <Clock className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" aria-hidden />
                     <span>
                       <span className="text-white">{entry.label}:</span> {entry.hours}
                     </span>
@@ -95,7 +96,7 @@ export function PublicFooter() {
           )}
           {settings.socialLinks.length > 0 && (
             <>
-              <h2 className="mt-6 text-sm font-bold uppercase tracking-[0.16em] text-white">Follow us</h2>
+              <h2 className="mt-6 text-sm font-bold uppercase tracking-[0.16em] text-brand-500">Follow us</h2>
               <ul className="mt-3 flex flex-wrap gap-3 text-sm">
                 {settings.socialLinks.map((link) => (
                   <li key={link.url}>
@@ -120,6 +121,9 @@ export function PublicFooter() {
             )}
             <Link to="/contact#privacy" className="hover:text-white/80">
               Privacy notice
+            </Link>
+            <Link to="/admin/login" className="inline-flex items-center gap-1 hover:text-brand-300">
+              <Lock className="h-3 w-3" aria-hidden /> Staff sign in
             </Link>
           </div>
         </div>

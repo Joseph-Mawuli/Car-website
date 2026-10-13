@@ -14,7 +14,7 @@ const DEFAULT_PRIVACY =
 function ContactItem({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
     <li className="flex gap-4">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400">{icon}</div>
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-500/10 text-brand-500">{icon}</div>
       <div className="min-w-0">
         <h3 className="text-sm font-semibold">{title}</h3>
         <div className="mt-0.5 text-[15px] text-fg-soft">{children}</div>
@@ -50,7 +50,7 @@ export function ContactPage() {
             <ul className="mt-6 space-y-6">
               {settings.whatsapp && (
                 <ContactItem icon={<WhatsAppIcon className="h-5 w-5" />} title="WhatsApp">
-                  <a href={buildWhatsAppLink(settings.whatsapp)} target="_blank" rel="noopener noreferrer" className="font-semibold text-brand-600 hover:underline dark:text-brand-400">
+                  <a href={buildWhatsAppLink(settings.whatsapp)} target="_blank" rel="noopener noreferrer" className="font-semibold text-brand-500 hover:text-brand-300 hover:underline">
                     Chat with us on WhatsApp
                   </a>
                 </ContactItem>
@@ -79,7 +79,7 @@ export function ContactPage() {
                 <ContactItem icon={<MapPin className="h-5 w-5" aria-hidden />} title="Location">
                   <p className="whitespace-pre-line">{settings.address}</p>
                   {settings.mapUrl && (
-                    <a href={settings.mapUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:underline dark:text-brand-400">
+                    <a href={settings.mapUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-brand-500 hover:text-brand-300 hover:underline">
                       Open in maps <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                     </a>
                   )}

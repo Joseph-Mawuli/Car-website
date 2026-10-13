@@ -38,7 +38,7 @@ export function Pagination({ page, totalPages, onPageChange }: { page: number; t
             type="button"
             onClick={() => onPageChange(p)}
             aria-current={p === page ? 'page' : undefined}
-            className={cn(btn, p === page ? 'border-brand-500 bg-brand-500 text-white' : 'bg-surface hover:border-brand-500', 'hidden sm:inline-flex', (p === page || p === 1 || p === totalPages) && 'inline-flex')}
+            className={cn(btn, p === page ? 'border-brand-500 bg-brand-500 text-ink-950' : 'bg-surface hover:border-brand-500', 'hidden sm:inline-flex', (p === page || p === 1 || p === totalPages) && 'inline-flex')}
           >
             {p}
           </button>

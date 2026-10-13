@@ -57,9 +57,9 @@ export function DashboardPage() {
       />
 
       <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-5">
-        <StatCard label="Total vehicles" value={v?.total} icon={CarFront} tone="bg-brand-500/12 text-brand-600 dark:text-brand-400" to="/admin/inventory" />
+        <StatCard label="Total vehicles" value={v?.total} icon={CarFront} tone="bg-brand-500/12 text-brand-500" to="/admin/inventory" />
         <StatCard label="Available" value={v?.available} icon={CheckCircle2} tone="bg-emerald-500/12 text-success" to="/admin/inventory?availability=available" />
-        <StatCard label="Reserved" value={v?.reserved} icon={Clock} tone="bg-amber-500/14 text-warning" to="/admin/inventory?availability=reserved" />
+        <StatCard label="Reserved" value={v?.reserved} icon={Clock} tone="bg-warning/14 text-warning" to="/admin/inventory?availability=reserved" />
         <StatCard label="Sold" value={v?.sold} icon={Tag} tone="bg-red-500/12 text-danger" to="/admin/inventory?availability=sold" />
         {can('enquiries:read') && (
           <StatCard label="New enquiries" value={data?.enquiries?.new} icon={Inbox} tone="bg-violet-500/12 text-violet-600" to="/admin/enquiries?status=new" />
@@ -73,7 +73,7 @@ export function DashboardPage() {
               <h2 id="recent-enquiries" className="font-semibold">
                 Recent enquiries
               </h2>
-              <Link to="/admin/enquiries" className="text-sm font-semibold text-brand-600 hover:underline dark:text-brand-400">
+              <Link to="/admin/enquiries" className="text-sm font-semibold text-brand-500 hover:text-brand-300 hover:underline">
                 View all
               </Link>
             </div>

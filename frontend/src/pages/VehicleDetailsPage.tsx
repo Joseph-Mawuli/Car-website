@@ -1,4 +1,5 @@
-import { Link, useParams } from 'react-router';
+import { useEffect } from 'react';
+import { Link, useLocation, useParams } from 'react-router';
 import { AlertTriangle, CalendarDays, Check, ChevronLeft, Fuel, Gauge, MapPin, Phone, Send, Settings2, Share2 } from 'lucide-react';
 import { getVehicle } from '@/features/inventory/api';
 import { VehicleGallery } from '@/features/inventory/VehicleGallery';
@@ -82,6 +83,7 @@ function VehicleDetailsContent({ vehicle, related }: { vehicle: Vehicle; related
   const { settings } = useSettings();
   const { displayCurrency, setDisplayCurrency } = useDisplayCurrency();
   const { notify } = useToast();
+  const { hash } = useLocation();
   const pageUrl = `${config.siteUrl}/cars/${vehicle.slug}`;
   const isSold = vehicle.availabilityStatus === 'sold';
   const isReserved = vehicle.availabilityStatus === 'reserved';
@@ -92,6 +94,10 @@ function VehicleDetailsContent({ vehicle, related }: { vehicle: Vehicle; related
   const telHref = settings.phone ? buildTelLink(settings.phone) : undefined;
   const currencies = availableDisplayCurrencies(vehicle.currency, settings.supportedCurrencies, settings.exchangeRates);
   const specs = specRows(vehicle);
+
+  useEffect(() => {
+    if (hash === '#enquire') document.getElementById('enquire')?.scrollIntoView();
+  }, [hash, vehicle.id]);
 
   const share = async () => {
     try {
@@ -162,7 +168,7 @@ function VehicleDetailsContent({ vehicle, related }: { vehicle: Vehicle; related
                   amount={vehicle.price}
                   currency={vehicle.currency}
                   showRateDate
-                  className={cn('text-3xl', isSold && 'text-muted line-through decoration-2 dark:text-muted')}
+                  className={cn('text-3xl', isSold && 'text-muted line-through decoration-2')}
                   estimateClassName="text-sm"
                 />
                 <AvailabilityBadge status={vehicle.availabilityStatus} />
@@ -178,7 +184,7 @@ function VehicleDetailsContent({ vehicle, related }: { vehicle: Vehicle; related
                       aria-pressed={displayCurrency === code}
                       className={cn(
                         'min-h-9 rounded-lg border px-3 text-xs font-bold',
-                        displayCurrency === code ? 'border-brand-500 bg-brand-500/10 text-brand-700 dark:text-brand-300' : 'border-line text-muted hover:text-fg',
+                        displayCurrency === code ? 'border-brand-500 bg-brand-500/10 text-brand-300' : 'border-line text-muted hover:text-fg',
                       )}
                     >
                       {code}
@@ -191,7 +197,7 @@ function VehicleDetailsContent({ vehicle, related }: { vehicle: Vehicle; related
                 <ul className="mt-5 grid grid-cols-2 gap-2">
                   {quickSpecs.map(({ icon: Icon, label, value }) => (
                     <li key={label} className="flex items-center gap-2.5 rounded-xl bg-surface-2 px-3 py-2.5">
-                      <Icon className="h-4 w-4 shrink-0 text-brand-600 dark:text-brand-400" aria-hidden />
+                      <Icon className="h-4 w-4 shrink-0 text-brand-500" aria-hidden />
                       <span className="min-w-0">
                         <span className="block text-[11px] font-semibold uppercase tracking-wide text-muted">{label}</span>
                         <span className="block truncate text-sm font-semibold">{value}</span>
@@ -231,7 +237,7 @@ function VehicleDetailsContent({ vehicle, related }: { vehicle: Vehicle; related
                     </AnchorButton>
                   )}
                   <AnchorButton href="#enquire" variant="primary" className={telHref ? '' : 'col-span-2'}>
-                    <Send className="h-4 w-4" aria-hidden /> Enquire
+                    <Send className="h-4 w-4" aria-hidden /> Enquire Now
                   </AnchorButton>
                 </div>
               </div>
@@ -272,7 +278,7 @@ function VehicleDetailsContent({ vehicle, related }: { vehicle: Vehicle; related
                 <ul className="mt-4 grid gap-2.5 sm:grid-cols-2">
                   {vehicle.features.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm text-fg-soft">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden /> {f}
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" aria-hidden /> {f}
                     </li>
                   ))}
                 </ul>
@@ -286,7 +292,7 @@ function VehicleDetailsContent({ vehicle, related }: { vehicle: Vehicle; related
                 </h2>
                 {vehicle.conditionNotes && <p className="mt-3 whitespace-pre-line text-fg-soft">{vehicle.conditionNotes}</p>}
                 {vehicle.knownDefects && (
-                  <div className="mt-4 flex gap-3 rounded-xl border border-amber-500/35 bg-amber-500/10 p-4">
+                  <div className="mt-4 flex gap-3 rounded-xl border border-brand-500/35 bg-brand-500/10 p-4">
                     <AlertTriangle className="h-5 w-5 shrink-0 text-warning" aria-hidden />
                     <div>
                       <h3 className="text-sm font-semibold">Known defects</h3>
@@ -325,7 +331,7 @@ function VehicleDetailsContent({ vehicle, related }: { vehicle: Vehicle; related
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur md:hidden">
         <div className="flex items-center gap-2">
           <div className="min-w-0 flex-1">
-            <p className={cn('truncate font-display text-lg font-bold text-brand-600 dark:text-brand-400', isSold && 'text-muted line-through')}>
+            <p className={cn('truncate font-display text-lg font-bold text-brand-500', isSold && 'text-muted line-through')}>
               {formatPrice(vehicle.price, vehicle.currency)}
             </p>
             <p className="truncate text-xs text-muted">{vehicle.title}</p>
@@ -341,7 +347,7 @@ function VehicleDetailsContent({ vehicle, related }: { vehicle: Vehicle; related
             </AnchorButton>
           ) : (
             <AnchorButton href="#enquire">
-              <Send className="h-4 w-4" aria-hidden /> Enquire
+              <Send className="h-4 w-4" aria-hidden /> Enquire Now
             </AnchorButton>
           )}
         </div>

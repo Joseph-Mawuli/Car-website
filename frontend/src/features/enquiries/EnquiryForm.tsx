@@ -112,7 +112,7 @@ export function EnquiryForm({ vehicleId, vehicleTitle, defaultMessage, className
           {CONTACT_OPTIONS.map((o) => (
             <label
               key={o.value}
-              className="flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-line-strong px-2 text-center text-sm font-semibold text-fg-soft has-[:checked]:border-brand-500 has-[:checked]:bg-brand-500/10 has-[:checked]:text-brand-700 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-400 dark:has-[:checked]:text-brand-300"
+              className="flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-line-strong px-2 text-center text-sm font-semibold text-fg-soft has-[:checked]:border-brand-500 has-[:checked]:bg-brand-500/10 has-[:checked]:text-brand-300 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-400"
             >
               <input type="radio" value={o.value} className="sr-only" {...register('preferredContact')} />
               {o.label}
@@ -131,7 +131,7 @@ export function EnquiryForm({ vehicleId, vehicleTitle, defaultMessage, className
         label={
           <>
             I agree that Goddel Motors may use these details to respond to my enquiry, as described in the{' '}
-            <Link to="/contact#privacy" className="font-semibold text-brand-600 underline dark:text-brand-400">
+            <Link to="/contact#privacy" className="font-semibold text-brand-500 underline hover:text-brand-300">
               privacy notice
             </Link>
             .

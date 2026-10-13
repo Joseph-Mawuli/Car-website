@@ -99,7 +99,7 @@ export function CurrencyConverter({ className }: { className?: string }) {
           <output
             htmlFor={`${id}-amount ${id}-from ${id}-to`}
             aria-live="polite"
-            className="block break-words rounded-xl bg-surface-2 px-3.5 py-2.5 font-display text-lg font-bold text-brand-600 dark:text-brand-400"
+            className="block break-words rounded-xl bg-surface-2 px-3.5 py-2.5 font-display text-lg font-bold text-brand-500"
           >
             {result ? `≈ ${formatPrice(result.amount, toCur)}` : '—'}
           </output>

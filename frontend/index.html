@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#f5f7fa" />
+    <meta name="theme-color" content="#050505" />
     <title>Goddel Motors — Quality Vehicles for Sale</title>
     <meta
       name="description"
@@ -24,16 +24,14 @@
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <script>
-      (function () {
-        try {
-          var stored = localStorage.getItem('gm-theme');
-          var theme = stored === 'dark' || stored === 'light' ? stored : 'light';
-          if (theme === 'dark') document.documentElement.classList.add('dark');
-          document.documentElement.style.colorScheme = theme;
-        } catch (e) {}
-      })();
-    </script>
+    <meta name="color-scheme" content="dark" />
+    <style>
+      html,
+      body {
+        background-color: #050505;
+        color: #ffffff;
+      }
+    </style>
   </head>
   <body>
     <noscript>Goddel Motors requires JavaScript to browse the inventory.</noscript>

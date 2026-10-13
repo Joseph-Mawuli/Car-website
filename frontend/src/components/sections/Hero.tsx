@@ -1,10 +1,9 @@
 import { ArrowRight } from 'lucide-react';
-import { AnchorButton, ButtonLink } from '@/components/ui/Button';
+import { ButtonLink } from '@/components/ui/Button';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { useSettings } from '@/providers/SettingsProvider';
 import { buildWhatsAppLink } from '@/lib/contact';
 
-/** Cinematic hero — intentionally dark in both light and dark themes. */
 export function Hero() {
   const { settings } = useSettings();
   return (
@@ -22,38 +21,42 @@ export function Hero() {
           height={1080}
           fetchPriority="high"
           decoding="async"
-          className="absolute inset-0 -z-10 h-full w-full object-cover object-[70%_center] opacity-90 sm:object-[65%_center]"
+          className="hero-photo absolute inset-0 -z-20 h-full w-full object-cover object-[70%_center] sm:object-[65%_center]"
         />
       </picture>
+      <div aria-hidden className="hero-streaks absolute inset-0 -z-10" />
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 bg-gradient-to-t from-ink-950 via-ink-950/55 to-ink-950/10 md:bg-gradient-to-r md:from-ink-950 md:via-ink-950/65 md:to-transparent"
+        className="absolute inset-0 -z-10 bg-gradient-to-t from-ink-950 via-ink-950/60 to-ink-950/10 md:bg-gradient-to-r md:from-ink-950 md:via-ink-950/70 md:to-transparent"
       />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-t from-bg to-transparent" />
 
-      <div className="container-page flex min-h-[540px] flex-col justify-end pb-24 pt-28 sm:min-h-[580px] md:min-h-[620px] md:justify-center md:pb-32 md:pt-16">
-        <p className="eyebrow !text-brand-300">{settings.dealershipName}</p>
-        <h1 className="mt-3 max-w-xl text-[2.25rem] font-extrabold leading-[1.08] text-white sm:text-5xl lg:text-6xl">
-          Find Your Next Car at <span className="text-brand-400">Goddel Motors</span>
+      <div className="container-page flex min-h-[560px] flex-col justify-end pb-24 pt-28 sm:min-h-[600px] md:min-h-[640px] md:justify-center md:pb-32 md:pt-16">
+        <p className="eyebrow">Premium cars. Trusted dealership.</p>
+        <h1 className="mt-4 max-w-2xl text-[2.5rem] font-extrabold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
+          Find Your Dream <span className="text-gold">Car Today</span>
         </h1>
-        <p className="mt-4 max-w-md text-base text-white/75 sm:text-lg">
-          Browse our available vehicles with clear prices, photos and specifications — then talk to us directly.
+        <p className="mt-5 max-w-md text-base leading-relaxed text-white/75 sm:text-lg">
+          Quality vehicles with clear prices, real photos and full specifications at {settings.dealershipName}.
         </p>
-        <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
           <ButtonLink to="/cars" size="lg">
-            Browse Inventory <ArrowRight className="h-5 w-5" aria-hidden />
+            Browse Cars <ArrowRight className="h-5 w-5" aria-hidden />
           </ButtonLink>
-          {settings.whatsapp && (
-            <AnchorButton
-              href={buildWhatsAppLink(settings.whatsapp, 'Hello Goddel Motors, I would like to enquire about your vehicles.')}
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="onDark"
-              size="lg"
-            >
-              <WhatsAppIcon className="h-5 w-5" /> Chat on WhatsApp
-            </AnchorButton>
-          )}
+          <ButtonLink to="/contact" variant="onDark" size="lg">
+            Contact Us
+          </ButtonLink>
         </div>
+        {settings.whatsapp && (
+          <a
+            href={buildWhatsAppLink(settings.whatsapp, 'Hello Goddel Motors, I would like to enquire about your vehicles.')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-5 inline-flex min-h-10 w-fit items-center gap-2 text-sm font-semibold text-white/70 transition-colors hover:text-brand-300"
+          >
+            <WhatsAppIcon className="h-4 w-4 text-whatsapp" /> Or chat with us on WhatsApp
+          </a>
+        )}
       </div>
     </section>
   );

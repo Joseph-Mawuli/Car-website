@@ -60,7 +60,7 @@ export function AboutPage() {
             const Icon = ICONS[i % ICONS.length];
             return (
               <li key={item.title} className="card p-6">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-500/10 text-brand-500">
                   <Icon className="h-5 w-5" aria-hidden />
                 </div>
                 <h3 className="mt-4 font-semibold">{item.title}</h3>

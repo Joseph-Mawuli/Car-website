@@ -190,7 +190,7 @@ export function CarsPage() {
               key={chip.key}
               type="button"
               onClick={() => updateParams({ [chip.key]: undefined })}
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-brand-500/40 bg-brand-500/10 px-3 text-sm font-semibold text-brand-700 hover:bg-brand-500/20 dark:text-brand-300"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-brand-500/40 bg-brand-500/10 px-3 text-sm font-semibold text-brand-300 hover:bg-brand-500/20"
             >
               {chip.label}
               <X className="h-3.5 w-3.5" aria-hidden />

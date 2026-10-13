@@ -26,7 +26,7 @@ function BrandCard({ brand }: { brand: Brand }) {
   return (
     <li>
       <Link to={brand.to} className="card group flex h-full flex-col p-4 transition-colors hover:border-brand-500/60">
-        <span className="font-display text-base font-bold group-hover:text-brand-600 dark:group-hover:text-brand-400">{brand.name}</span>
+        <span className="font-display text-base font-bold group-hover:text-brand-300">{brand.name}</span>
         <span className="mt-1 text-sm text-muted">{brand.models}</span>
       </Link>
     </li>
@@ -38,7 +38,7 @@ function MoreCard() {
     <li>
       <Link
         to="/cars"
-        className="flex h-full min-h-20 items-center justify-center gap-1 rounded-2xl border border-dashed border-line-strong p-4 text-sm font-semibold text-muted transition-colors hover:border-brand-500/60 hover:text-brand-600 dark:hover:text-brand-400"
+        className="flex h-full min-h-20 items-center justify-center gap-1 rounded-2xl border border-dashed border-line-strong p-4 text-sm font-semibold text-muted transition-colors hover:border-brand-500/60 hover:text-brand-300"
       >
         And many more <ArrowRight className="h-4 w-4" aria-hidden />
       </Link>

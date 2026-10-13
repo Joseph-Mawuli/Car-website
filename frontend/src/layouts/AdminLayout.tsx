@@ -2,7 +2,6 @@ import { useState, type ReactNode } from 'react';
 import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router';
 import { ExternalLink, FileClock, Gauge, Inbox, LogOut, Menu, Settings, ShieldAlert, Users, CarFront } from 'lucide-react';
 import { Logo } from '@/components/brand/Logo';
-import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { PreviewModeBanner } from '@/components/layout/PreviewModeBanner';
 import { Dialog } from '@/components/ui/Dialog';
 import { ButtonLink } from '@/components/ui/Button';
@@ -46,12 +45,12 @@ export function AdminLayout() {
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
       'flex min-h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-semibold transition-colors',
-      isActive ? 'bg-brand-500/12 text-brand-700 dark:text-brand-300' : 'text-fg-soft hover:bg-surface-2 hover:text-fg',
+      isActive ? 'bg-brand-500/12 text-brand-400 ring-1 ring-inset ring-brand-500/35' : 'text-fg-soft hover:bg-surface-2 hover:text-brand-300',
     );
 
   const userCard = (
     <div className="flex items-center gap-3 rounded-xl bg-surface-2 p-3">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-500 text-sm font-bold text-white" aria-hidden>
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-500 text-sm font-bold text-ink-950" aria-hidden>
         {initials(staff.displayName)}
       </span>
       <span className="min-w-0">
@@ -75,7 +74,7 @@ export function AdminLayout() {
     <div className="min-h-dvh bg-bg">
       <PreviewModeBanner />
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line bg-surface p-4 lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line bg-bg-2 p-4 lg:flex">
         <Link to="/admin" className="mb-6 px-2 pt-1">
           <Logo />
         </Link>
@@ -85,27 +84,23 @@ export function AdminLayout() {
             <ExternalLink className="h-4 w-4" aria-hidden /> View website
           </a>
           {userCard}
-          <div className="flex items-center justify-between">
-            <ThemeToggle />
-            <button
-              type="button"
-              onClick={() => signOut()}
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-fg-soft hover:bg-surface-2 hover:text-fg"
-            >
-              <LogOut className="h-4 w-4" aria-hidden /> Sign out
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => signOut()}
+            className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 text-sm font-semibold text-fg-soft hover:bg-surface-2 hover:text-fg"
+          >
+            <LogOut className="h-4 w-4" aria-hidden /> Sign out
+          </button>
         </div>
       </aside>
 
       {/* Mobile top bar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-line bg-surface/95 px-3 backdrop-blur lg:hidden">
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-line bg-bg-2/95 px-3 backdrop-blur lg:hidden">
         <Link to="/admin" aria-label="Dashboard">
           <Logo className="[&_svg]:h-7" />
         </Link>
         <div className="ml-auto flex items-center">
-          <ThemeToggle />
-          <button type="button" onClick={() => setMenuOpen(true)} className="inline-flex h-11 w-11 items-center justify-center rounded-xl hover:bg-surface-2" aria-label="Open admin menu">
+          <button type="button" onClick={() => setMenuOpen(true)} className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-brand-500 hover:bg-surface-2" aria-label="Open admin menu">
             <Menu className="h-6 w-6" aria-hidden />
           </button>
         </div>
@@ -137,14 +132,14 @@ export function AdminLayout() {
       </main>
 
       {/* Mobile bottom navigation */}
-      <nav aria-label="Admin quick navigation" className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+      <nav aria-label="Admin quick navigation" className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-bg-2/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
         {bottomNav.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}
             end={end}
             className={({ isActive }) =>
-              cn('flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold', isActive ? 'text-brand-600 dark:text-brand-400' : 'text-muted')
+              cn('flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold', isActive ? 'text-brand-500' : 'text-muted hover:text-fg')
             }
           >
             <Icon className="h-5 w-5" aria-hidden />
@@ -161,7 +156,7 @@ export function RequirePermission({ permission, children }: { permission: Permis
   if (!can(permission)) {
     return (
       <div className="card mx-auto mt-10 max-w-md p-8 text-center">
-        <ShieldAlert className="mx-auto h-10 w-10 text-amber-500" aria-hidden />
+        <ShieldAlert className="mx-auto h-10 w-10 text-brand-500" aria-hidden />
         <h1 className="mt-4 text-xl font-semibold">You don't have access to this page</h1>
         <p className="mt-2 text-sm text-muted">Your role doesn't include this area. Ask the dealership owner if you need access.</p>
         <ButtonLink to="/admin" className="mt-6">

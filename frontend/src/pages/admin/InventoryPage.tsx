@@ -185,7 +185,7 @@ export function InventoryPage() {
                     <Link to={`/admin/inventory/${v.id}`} className="line-clamp-2 font-semibold leading-snug">
                       {v.title}
                     </Link>
-                    <p className="mt-0.5 whitespace-nowrap text-sm font-bold text-brand-600 dark:text-brand-400">{formatPrice(v.price, v.currency)}</p>
+                    <p className="mt-0.5 whitespace-nowrap text-sm font-bold text-brand-500">{formatPrice(v.price, v.currency)}</p>
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       <AvailabilityBadge status={v.availabilityStatus} />
                       {v.visibility !== 'published' && <VisibilityBadge visibility={v.visibility} />}

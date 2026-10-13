@@ -117,7 +117,7 @@ export function EnquiryDetailPage() {
           <section className="card p-5 sm:p-6">
             <h2 className="font-semibold">Message</h2>
             {enquiry.vehicle && (
-              <a href={`/cars/${enquiry.vehicle.slug}`} target="_blank" rel="noopener" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:underline dark:text-brand-400">
+              <a href={`/cars/${enquiry.vehicle.slug}`} target="_blank" rel="noopener" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-500 hover:text-brand-300 hover:underline">
                 {enquiry.vehicle.title} <ExternalLink className="h-3.5 w-3.5" aria-hidden />
               </a>
             )}

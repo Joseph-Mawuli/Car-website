@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, NavLink } from 'react-router';
 import { Menu, Phone, Search } from 'lucide-react';
 import { Logo } from '@/components/brand/Logo';
-import { ThemeToggle } from './ThemeToggle';
 import { CurrencySwitcher } from './CurrencySwitcher';
 import { Dialog } from '@/components/ui/Dialog';
 import { AnchorButton, ButtonLink } from '@/components/ui/Button';
@@ -13,8 +12,8 @@ import { cn } from '@/lib/format';
 
 export const PUBLIC_NAV = [
   { to: '/', label: 'Home', end: true },
-  { to: '/cars', label: 'Browse Cars', end: false },
-  { to: '/about', label: 'About', end: true },
+  { to: '/cars', label: 'Cars', end: false },
+  { to: '/about', label: 'About Us', end: true },
   { to: '/contact', label: 'Contact', end: true },
 ];
 
@@ -23,13 +22,13 @@ export function PublicHeader() {
   const { settings } = useSettings();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur-md supports-[backdrop-filter]:bg-surface/80">
-      <div className="container-page flex h-16 items-center gap-3 md:h-[72px]">
+    <header className="sticky top-0 z-40 border-b border-line/70 bg-bg/85 backdrop-blur-md">
+      <div className="container-page flex h-16 items-center gap-3 md:h-[76px]">
         <Link to="/" className="rounded-lg" aria-label="Goddel Motors home">
           <Logo />
         </Link>
 
-        <nav aria-label="Main" className="ml-8 hidden items-center gap-1 md:flex">
+        <nav aria-label="Main" className="mx-auto hidden items-center gap-2 md:flex">
           {PUBLIC_NAV.map((item) => (
             <NavLink
               key={item.to}
@@ -37,8 +36,9 @@ export function PublicHeader() {
               end={item.end}
               className={({ isActive }) =>
                 cn(
-                  'relative rounded-lg px-3 py-2 text-[15px] font-semibold transition-colors',
-                  isActive ? 'text-brand-600 dark:text-brand-400' : 'text-fg-soft hover:text-fg',
+                  'relative px-3 py-2 text-[15px] font-semibold transition-colors',
+                  'after:absolute after:inset-x-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-brand-500 after:transition-transform after:duration-200',
+                  isActive ? 'text-brand-500 after:scale-x-100' : 'text-fg-soft after:scale-x-0 hover:text-brand-300',
                 )
               }
             >
@@ -47,38 +47,22 @@ export function PublicHeader() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-1 md:ml-0">
           <Link
             to="/cars?focus=search"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-fg-soft hover:bg-surface-2 hover:text-fg"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-fg-soft transition-colors hover:bg-surface-2 hover:text-brand-300"
             aria-label="Search cars"
           >
             <Search className="h-5 w-5" aria-hidden />
           </Link>
           <CurrencySwitcher />
-          <div className="hidden sm:block">
-            <ThemeToggle />
-          </div>
-          {settings.whatsapp && (
-            <AnchorButton
-              href={buildWhatsAppLink(settings.whatsapp, 'Hello Goddel Motors, I would like to enquire about your vehicles.')}
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="whatsapp"
-              size="sm"
-              className="ml-1 hidden lg:inline-flex"
-            >
-              <WhatsAppIcon className="h-4 w-4" />
-              WhatsApp
-            </AnchorButton>
-          )}
-          <ButtonLink to="/cars" size="sm" className="ml-1 hidden md:inline-flex">
-            Browse Cars
+          <ButtonLink to="/contact" size="sm" className="ml-2 hidden md:inline-flex">
+            Enquire Now
           </ButtonLink>
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-fg hover:bg-surface-2 md:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-brand-500 hover:bg-surface-2 md:hidden"
             aria-label="Open menu"
             aria-expanded={menuOpen}
           >
@@ -97,8 +81,8 @@ export function PublicHeader() {
               onClick={() => setMenuOpen(false)}
               className={({ isActive }) =>
                 cn(
-                  'rounded-xl px-4 py-3.5 text-base font-semibold',
-                  isActive ? 'bg-brand-500/10 text-brand-700 dark:text-brand-300' : 'text-fg hover:bg-surface-2',
+                  'rounded-xl border-l-2 px-4 py-3.5 text-base font-semibold transition-colors',
+                  isActive ? 'border-brand-500 bg-brand-500/10 text-brand-500' : 'border-transparent text-fg hover:bg-surface-2 hover:text-brand-300',
                 )
               }
             >
@@ -107,6 +91,9 @@ export function PublicHeader() {
           ))}
         </nav>
         <div className="mt-6 flex flex-col gap-3 border-t border-line pt-6">
+          <ButtonLink to="/contact" onClick={() => setMenuOpen(false)}>
+            Enquire Now
+          </ButtonLink>
           {settings.whatsapp && (
             <AnchorButton href={buildWhatsAppLink(settings.whatsapp)} target="_blank" rel="noopener noreferrer" variant="whatsapp">
               <WhatsAppIcon className="h-5 w-5" /> Chat on WhatsApp
@@ -117,7 +104,6 @@ export function PublicHeader() {
               <Phone className="h-5 w-5" aria-hidden /> Call {settings.phone}
             </AnchorButton>
           )}
-          <ThemeToggle showLabel className="justify-start" />
         </div>
       </Dialog>
     </header>

@@ -25,8 +25,6 @@ vi.mock('@/features/admin/AuthProvider', () => ({
 }));
 
 import { AdminLayout, RequirePermission } from './AdminLayout';
-import { ThemeProvider } from '@/providers/ThemeProvider';
-
 function setRole(permissions: Permission[]) {
   authState.value = {
     status: 'signedIn',
@@ -37,24 +35,22 @@ function setRole(permissions: Permission[]) {
 
 function renderAdmin(path: string) {
   return render(
-    <ThemeProvider>
-      <MemoryRouter initialEntries={[path]}>
-        <Routes>
-          <Route path="/admin/login" element={<p>Login screen</p>} />
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<p>Dashboard</p>} />
-            <Route
-              path="team"
-              element={
-                <RequirePermission permission="staff:manage">
-                  <p>Team management</p>
-                </RequirePermission>
-              }
-            />
-          </Route>
-        </Routes>
-      </MemoryRouter>
-    </ThemeProvider>,
+    <MemoryRouter initialEntries={[path]}>
+      <Routes>
+        <Route path="/admin/login" element={<p>Login screen</p>} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<p>Dashboard</p>} />
+          <Route
+            path="team"
+            element={
+              <RequirePermission permission="staff:manage">
+                <p>Team management</p>
+              </RequirePermission>
+            }
+          />
+        </Route>
+      </Routes>
+    </MemoryRouter>,
   );
 }
 

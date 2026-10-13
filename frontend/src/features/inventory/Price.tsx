@@ -27,14 +27,14 @@ export function Price({ amount, currency, className, estimateClassName, showRate
   if (!converted) {
     return (
       <span className="inline-flex flex-col">
-        <span className={cn('font-display font-bold text-brand-600 dark:text-brand-400', className)}>{listed}</span>
+        <span className={cn('font-display font-bold text-brand-500', className)}>{listed}</span>
       </span>
     );
   }
 
   return (
     <span className="inline-flex flex-col">
-      <span className={cn('font-display font-bold text-brand-600 dark:text-brand-400', className)}>
+      <span className={cn('font-display font-bold text-brand-500', className)}>
         ≈ {formatPrice(converted.amount, converted.currency)}
       </span>
       <span className={cn('text-xs text-muted', estimateClassName)}>

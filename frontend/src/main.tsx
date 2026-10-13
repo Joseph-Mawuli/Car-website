@@ -2,7 +2,6 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
 import { App } from './App';
-import { ThemeProvider } from '@/providers/ThemeProvider';
 import { SettingsProvider } from '@/providers/SettingsProvider';
 import { CurrencyProvider } from '@/providers/CurrencyProvider';
 import { ToastProvider } from '@/components/ui/Toast';
@@ -20,15 +19,13 @@ async function start() {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <BrowserRouter>
-        <ThemeProvider>
-          <SettingsProvider>
-            <CurrencyProvider>
-              <ToastProvider>
-                <App />
-              </ToastProvider>
-            </CurrencyProvider>
-          </SettingsProvider>
-        </ThemeProvider>
+        <SettingsProvider>
+          <CurrencyProvider>
+            <ToastProvider>
+              <App />
+            </ToastProvider>
+          </CurrencyProvider>
+        </SettingsProvider>
       </BrowserRouter>
     </StrictMode>,
   );

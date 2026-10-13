@@ -37,7 +37,7 @@ export function EmptyState({
   return (
     <div className={cn('card flex flex-col items-center px-6 py-12 text-center', className)}>
       {icon && (
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-600 dark:text-brand-400">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-500">
           {icon}
         </div>
       )}
@@ -78,9 +78,9 @@ export function ErrorState({
 export function Alert({ tone = 'info', children, className }: { tone?: 'info' | 'success' | 'error' | 'warning'; children: ReactNode; className?: string }) {
   const tones = {
     info: 'border-brand-500/30 bg-brand-500/8 text-fg-soft',
-    success: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200',
-    error: 'border-red-500/30 bg-red-500/10 text-red-800 dark:text-red-200',
-    warning: 'border-amber-500/35 bg-amber-500/10 text-amber-900 dark:text-amber-200',
+    success: 'border-success/30 bg-success/10 text-emerald-200',
+    error: 'border-danger/30 bg-danger/10 text-red-200',
+    warning: 'border-brand-500/35 bg-brand-500/10 text-brand-100',
   };
   return (
     <div role={tone === 'error' ? 'alert' : 'status'} className={cn('rounded-xl border px-4 py-3 text-sm', tones[tone], className)}>

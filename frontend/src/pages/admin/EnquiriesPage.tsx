@@ -51,7 +51,7 @@ export function EnquiriesPage() {
             onClick={() => setParam('status', t.value || undefined)}
             className={cn(
               'min-h-10 shrink-0 rounded-full border px-4 text-sm font-semibold',
-              (status ?? '') === t.value ? 'border-brand-500 bg-brand-500 text-white' : 'border-line bg-surface text-fg-soft hover:border-brand-500',
+              (status ?? '') === t.value ? 'border-brand-500 bg-brand-500 text-ink-950' : 'border-line bg-surface text-fg-soft hover:border-brand-500',
             )}
           >
             {t.label}

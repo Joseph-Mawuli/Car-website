@@ -38,7 +38,7 @@ export function CurrencySwitcher({ className, variant = 'compact' }: { className
         className={cn(
           'cursor-pointer appearance-none bg-transparent font-bold hover:bg-surface-2 hover:text-fg focus-visible:outline-2 focus-visible:outline-brand-500',
           variant === 'inline'
-            ? 'h-7 rounded-lg pl-2 pr-6 text-xs text-brand-600 dark:text-brand-400'
+            ? 'h-7 rounded-lg pl-2 pr-6 text-xs text-brand-500'
             : 'h-11 rounded-xl pl-2 pr-6 text-sm text-fg-soft sm:pl-3 sm:pr-7',
         )}
       >

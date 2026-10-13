@@ -173,7 +173,7 @@ export function PhotoManager({ vehicleId, vehicleTitle, images, onChange, readOn
               <div className="relative aspect-[4/3] bg-surface-3">
                 <VehicleImage image={img} alt={img.alt || `${vehicleTitle} photo ${index + 1}`} sizes="(min-width: 1280px) 20vw, (min-width: 640px) 40vw, 90vw" />
                 {index === 0 && (
-                  <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-md bg-brand-500 px-2 py-0.5 text-[11px] font-bold uppercase text-white">
+                  <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-md bg-brand-500 px-2 py-0.5 text-[11px] font-bold uppercase text-ink-950">
                     <Star className="h-3 w-3" aria-hidden /> Cover
                   </span>
                 )}
