@@ -17,6 +17,11 @@ export function buildTelLink(phone: string): string {
   return `tel:${phone.replace(/[^\d+]/g, '')}`;
 }
 
+/** The main phone followed by any additional numbers, without duplicates. */
+export function allPhones(s: { phone?: string; additionalPhones?: string[] }): string[] {
+  return [...new Set([s.phone, ...(s.additionalPhones ?? [])].filter((p): p is string => Boolean(p)))];
+}
+
 export function buildMailtoLink(email: string, subject?: string): string {
   return subject ? `mailto:${email}?subject=${encodeURIComponent(subject)}` : `mailto:${email}`;
 }

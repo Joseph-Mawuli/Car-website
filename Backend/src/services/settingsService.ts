@@ -68,6 +68,7 @@ function serializeSettings(s: SiteSettingsRecord) {
     dealershipName: s.dealershipName,
     tagline: s.tagline,
     phone: s.phone,
+    additionalPhones: s.additionalPhones ?? [],
     whatsapp: s.whatsapp,
     email: s.email,
     address: s.address,

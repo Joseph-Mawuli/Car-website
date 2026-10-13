@@ -143,6 +143,8 @@ export interface PublicSettings {
   dealershipName: string;
   tagline?: string;
   phone?: string;
+  /** Extra numbers shown alongside the main phone. */
+  additionalPhones?: string[];
   whatsapp?: string;
   email?: string;
   address?: string;

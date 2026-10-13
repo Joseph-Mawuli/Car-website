@@ -64,8 +64,10 @@ function LogoEmblemPaths() {
   );
 }
 
-/** Header lockup: emblem + stacked wordmark. */
-export function Logo({ className, inverted = false }: { className?: string; inverted?: boolean }) {
+export const BRAND_SLOGAN = 'Perfect ride, just for you';
+
+/** Header lockup: emblem + stacked wordmark + slogan. */
+export function Logo({ className, inverted = false, showSlogan = true }: { className?: string; inverted?: boolean; showSlogan?: boolean }) {
   return (
     <span className={cn('inline-flex items-center gap-2', inverted ? 'text-white' : 'text-fg', className)}>
       <LogoEmblem className="h-8 w-auto shrink-0 sm:h-9" />
@@ -74,6 +76,11 @@ export function Logo({ className, inverted = false }: { className?: string; inve
         <span className="mt-0.5 text-[10px] font-semibold tracking-[0.42em] text-brand-600 dark:text-brand-400 sm:text-[11px]">
           MOTORS
         </span>
+        {showSlogan && (
+          <span className={cn('mt-1 whitespace-nowrap font-sans text-[9px] font-medium italic tracking-wide sm:text-[10px]', inverted ? 'text-white/70' : 'text-muted')}>
+            {BRAND_SLOGAN}
+          </span>
+        )}
       </span>
     </span>
   );

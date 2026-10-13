@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import { ArrowRight, BadgeCheck, CarFront, MessageCircle, ShieldCheck } from 'lucide-react';
 import { Hero } from '@/components/sections/Hero';
 import { ContactBand } from '@/components/sections/ContactBand';
+import { BrandsSection } from '@/components/sections/BrandsSection';
 import { QuickSearch } from '@/features/inventory/QuickSearch';
 import { VehicleCard, VehicleCardSkeleton } from '@/features/inventory/VehicleCard';
 import { BodyTypeIcon } from '@/features/inventory/bodyTypeIcons';
@@ -81,6 +82,8 @@ export function HomePage() {
           />
         )}
       </section>
+
+      <BrandsSection />
 
       {bodyTypes.length > 0 && (
         <section aria-labelledby="categories-title" className="container-page mt-16">

@@ -125,8 +125,9 @@ const enquiries: Enquiry[] = [
 
 let settings: AdminSettings = {
   dealershipName: 'Goddel Motors',
-  tagline: 'Quality vehicles, honest service.',
+  tagline: 'Perfect ride, just for you.',
   phone: '+233 20 000 0000',
+  additionalPhones: [],
   whatsapp: '+233 20 000 0000',
   email: 'sales@example.com',
   address: 'Preview address — set in Admin › Settings',

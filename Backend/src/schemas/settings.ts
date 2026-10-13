@@ -20,6 +20,7 @@ export const updateSettingsSchema = z
       .union([z.literal(''), z.string().trim().regex(PHONE_PATTERN, 'Enter a valid phone number.')])
       .optional()
       .transform((v) => v || undefined),
+    additionalPhones: z.array(z.string().trim().regex(PHONE_PATTERN, 'Enter a valid phone number.')).max(4).default([]),
     whatsapp: z
       .union([z.literal(''), z.string().trim().regex(/^\+?[\d\s]{8,20}$/, 'Use international format, e.g. +233 24 123 4567.')])
       .optional()

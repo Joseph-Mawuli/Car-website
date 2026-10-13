@@ -6,7 +6,7 @@ import { EnquiryForm } from '@/features/enquiries/EnquiryForm';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 import { useSettings } from '@/providers/SettingsProvider';
-import { buildMailtoLink, buildTelLink, buildWhatsAppLink } from '@/lib/contact';
+import { allPhones, buildMailtoLink, buildTelLink, buildWhatsAppLink } from '@/lib/contact';
 
 const DEFAULT_PRIVACY =
   'We only use the details you submit (your name, phone number, optional email address and message) to respond to your enquiry about our vehicles. Your details are stored securely, are only accessible to authorised Goddel Motors staff, and are not sold or shared with third parties for marketing. To ask us to update or delete your details, contact us using the information on this page.';
@@ -32,7 +32,8 @@ export function ContactPage() {
     if (hash) document.getElementById(hash.slice(1))?.scrollIntoView();
   }, [hash]);
 
-  const hasDirectContact = settings.whatsapp || settings.phone || settings.email || settings.address;
+  const phones = allPhones(settings);
+  const hasDirectContact = settings.whatsapp || phones.length > 0 || settings.email || settings.address;
 
   return (
     <>
@@ -54,11 +55,17 @@ export function ContactPage() {
                   </a>
                 </ContactItem>
               )}
-              {settings.phone && (
-                <ContactItem icon={<Phone className="h-5 w-5" aria-hidden />} title="Phone">
-                  <a href={buildTelLink(settings.phone)} className="font-semibold hover:underline">
-                    {settings.phone}
-                  </a>
+              {phones.length > 0 && (
+                <ContactItem icon={<Phone className="h-5 w-5" aria-hidden />} title={phones.length > 1 ? 'Phone numbers' : 'Phone'}>
+                  <ul className="space-y-1">
+                    {phones.map((phone) => (
+                      <li key={phone}>
+                        <a href={buildTelLink(phone)} className="font-semibold hover:underline">
+                          {phone}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
                 </ContactItem>
               )}
               {settings.email && (

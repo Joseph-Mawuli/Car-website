@@ -6,6 +6,8 @@ export interface SiteSettingsRecord {
   dealershipName: string;
   tagline?: string;
   phone?: string;
+  /** Extra numbers shown alongside the main phone. */
+  additionalPhones: string[];
   whatsapp?: string;
   email?: string;
   address?: string;
@@ -36,6 +38,7 @@ const siteSettingsSchema = new Schema<SiteSettingsRecord>(
     dealershipName: { type: String, required: true, default: 'Goddel Motors', maxlength: 80 },
     tagline: { type: String, maxlength: 200 },
     phone: { type: String, maxlength: 30 },
+    additionalPhones: { type: [{ type: String, maxlength: 30 }], default: [] },
     whatsapp: { type: String, maxlength: 30 },
     email: { type: String, maxlength: 120 },
     address: { type: String, maxlength: 300 },

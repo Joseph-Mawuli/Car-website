@@ -14,13 +14,24 @@ import { ApiError, errorMessage } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 import { CURRENCIES, CURRENCY_NAMES, type AdminSettings, type CurrencyCode } from '@/types';
 
+const PHONE = /^\+?[\d\s()-]{7,20}$/;
+const splitPhones = (v: string) =>
+  v
+    .split(/[,\n]/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
 const optionalHttps = z.string().trim().refine((v) => v === '' || /^https:\/\/\S+$/i.test(v), 'Links must start with https://');
 
 const schema = z
   .object({
     dealershipName: z.string().trim().min(1, 'Required.').max(80),
     tagline: z.string().trim().max(200),
-    phone: z.string().trim().refine((v) => v === '' || /^\+?[\d\s()-]{7,20}$/.test(v), 'Enter a valid phone number.'),
+    phone: z.string().trim().refine((v) => v === '' || PHONE.test(v), 'Enter a valid phone number.'),
+    additionalPhones: z
+      .string()
+      .refine((v) => splitPhones(v).every((p) => PHONE.test(p)), 'Enter valid phone numbers, separated by commas.')
+      .refine((v) => splitPhones(v).length <= 4, 'Add up to 4 extra numbers.'),
     whatsapp: z.string().trim().refine((v) => v === '' || /^\+?[\d\s]{8,20}$/.test(v), 'Use international format, e.g. +233 24 123 4567.'),
     email: z.union([z.literal(''), z.email('Enter a valid email.')]),
     address: z.string().trim().max(300),
@@ -54,6 +65,7 @@ function toValues(s: AdminSettings): Values {
     dealershipName: s.dealershipName,
     tagline: s.tagline ?? '',
     phone: s.phone ?? '',
+    additionalPhones: (s.additionalPhones ?? []).join(', '),
     whatsapp: s.whatsapp ?? '',
     email: s.email ?? '',
     address: s.address ?? '',
@@ -73,7 +85,7 @@ function toValues(s: AdminSettings): Values {
 }
 
 function toPayload(v: Values): Record<string, unknown> {
-  const { ratesPerForeign, rateSource, ...rest } = v;
+  const { ratesPerForeign, rateSource, additionalPhones, ...rest } = v;
   const rates: Partial<Record<CurrencyCode, number>> = {};
   for (const code of v.supportedCurrencies) {
     const per = ratesPerForeign[code];
@@ -81,6 +93,7 @@ function toPayload(v: Values): Record<string, unknown> {
   }
   return {
     ...rest,
+    additionalPhones: splitPhones(additionalPhones),
     exchangeRates: Object.keys(rates).length ? { rates, source: rateSource || undefined } : undefined,
   };
 }
@@ -153,6 +166,14 @@ function SettingsForm({ settings, onSaved }: { settings: AdminSettings; onSaved:
             <TextField label="Dealership name" required error={errors.dealershipName?.message} {...register('dealershipName')} />
             <TextField label="Tagline" error={errors.tagline?.message} {...register('tagline')} />
             <TextField label="Phone" type="tel" placeholder="+233 …" error={errors.phone?.message} {...register('phone')} />
+            <TextField
+              label="Other phone numbers"
+              type="tel"
+              placeholder="054 …, 050 …"
+              hint="Optional. Separate numbers with commas."
+              error={errors.additionalPhones?.message}
+              {...register('additionalPhones')}
+            />
             <TextField label="WhatsApp number" type="tel" placeholder="+233 …" hint="International format, used for WhatsApp links." error={errors.whatsapp?.message} {...register('whatsapp')} />
             <TextField label="Email" type="email" error={errors.email?.message} {...register('email')} />
             <TextField label="Google Maps link" placeholder="https://maps.google.com/…" error={errors.mapUrl?.message} {...register('mapUrl')} />

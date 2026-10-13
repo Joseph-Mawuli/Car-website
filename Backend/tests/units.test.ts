@@ -82,6 +82,13 @@ describe('settings validation', () => {
     expect(updateSettingsSchema.safeParse({ dealershipName: 'G', defaultCurrency: 'GHS', supportedCurrencies: ['GHS', 'USD'], exchangeRates: { rates: { USD: -1 } } }).success).toBe(false);
   });
 
+  it('validates additional phone numbers', () => {
+    const base = { dealershipName: 'G', defaultCurrency: 'GHS', supportedCurrencies: ['GHS'] };
+    expect(updateSettingsSchema.parse(base).additionalPhones).toEqual([]);
+    expect(updateSettingsSchema.safeParse({ ...base, additionalPhones: ['054 833 0049', '0504927895'] }).success).toBe(true);
+    expect(updateSettingsSchema.safeParse({ ...base, additionalPhones: ['call me'] }).success).toBe(false);
+  });
+
   it('accepts rates for only some currencies', () => {
     const r = updateSettingsSchema.safeParse({ dealershipName: 'G', defaultCurrency: 'GHS', supportedCurrencies: ['GHS', 'USD'], exchangeRates: { rates: { USD: 0.0625 } } });
     expect(r.success).toBe(true);

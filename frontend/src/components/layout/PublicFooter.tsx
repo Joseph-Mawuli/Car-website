@@ -1,9 +1,9 @@
 import { Link } from 'react-router';
 import { Clock, Mail, MapPin, Phone } from 'lucide-react';
-import { Logo } from '@/components/brand/Logo';
+import { BRAND_SLOGAN, Logo } from '@/components/brand/Logo';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { useSettings } from '@/providers/SettingsProvider';
-import { buildMailtoLink, buildTelLink, buildWhatsAppLink } from '@/lib/contact';
+import { allPhones, buildMailtoLink, buildTelLink, buildWhatsAppLink } from '@/lib/contact';
 import { PUBLIC_NAV } from './PublicHeader';
 
 export function PublicFooter() {
@@ -14,9 +14,9 @@ export function PublicFooter() {
     <footer className="mt-16 bg-ink-950 text-white/80">
       <div className="container-page grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2 lg:col-span-1">
-          <Logo inverted />
+          <Logo inverted showSlogan={false} />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/60">
-            {settings.tagline || 'Browse our available vehicles and contact us directly to arrange a viewing.'}
+            {settings.tagline || `${BRAND_SLOGAN}.`}
           </p>
         </div>
 
@@ -36,13 +36,13 @@ export function PublicFooter() {
         <div>
           <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-white">Contact</h2>
           <ul className="mt-4 space-y-3 text-sm">
-            {settings.phone && (
-              <li>
-                <a href={buildTelLink(settings.phone)} className="inline-flex items-center gap-2 hover:text-brand-300">
-                  <Phone className="h-4 w-4" aria-hidden /> {settings.phone}
+            {allPhones(settings).map((phone) => (
+              <li key={phone}>
+                <a href={buildTelLink(phone)} className="inline-flex items-center gap-2 hover:text-brand-300">
+                  <Phone className="h-4 w-4" aria-hidden /> {phone}
                 </a>
               </li>
-            )}
+            ))}
             {settings.whatsapp && (
               <li>
                 <a
