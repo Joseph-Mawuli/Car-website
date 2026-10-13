@@ -5,6 +5,8 @@ export type FuelType = 'petrol' | 'diesel' | 'hybrid' | 'plug_in_hybrid' | 'elec
 export type Transmission = 'automatic' | 'manual' | 'cvt' | 'dual_clutch' | 'other';
 export type Drivetrain = 'fwd' | 'rwd' | 'awd' | '4wd';
 export type MileageUnit = 'km' | 'mi';
+/** A known key, or the wording staff typed when none of the known values fit. */
+export type Choice<T extends string> = T | (string & {});
 export type BodyType =
   | 'suv'
   | 'sedan'
@@ -66,13 +68,13 @@ export interface VehicleSummary {
   year: number;
   price: number;
   currency: CurrencyCode;
-  condition?: VehicleCondition;
+  condition?: Choice<VehicleCondition>;
   availabilityStatus: AvailabilityStatus;
-  bodyType?: BodyType;
+  bodyType?: Choice<BodyType>;
   mileage?: number;
   mileageUnit?: MileageUnit;
-  fuelType?: FuelType;
-  transmission?: Transmission;
+  fuelType?: Choice<FuelType>;
+  transmission?: Choice<Transmission>;
   location?: string;
   isDemo?: boolean;
   primaryImage?: VehicleImage;
@@ -81,7 +83,7 @@ export interface VehicleSummary {
 
 export interface Vehicle extends VehicleSummary {
   engineSize?: string;
-  drivetrain?: Drivetrain;
+  drivetrain?: Choice<Drivetrain>;
   exteriorColor?: string;
   interiorColor?: string;
   description?: string;
@@ -109,10 +111,10 @@ export interface Paginated<T> {
 
 export interface VehicleFacets {
   makes: string[];
-  bodyTypes: BodyType[];
-  fuelTypes: FuelType[];
-  transmissions: Transmission[];
-  conditions: VehicleCondition[];
+  bodyTypes: Choice<BodyType>[];
+  fuelTypes: Choice<FuelType>[];
+  transmissions: Choice<Transmission>[];
+  conditions: Choice<VehicleCondition>[];
   years: { min: number | null; max: number | null };
   price: { min: number | null; max: number | null };
 }

@@ -26,6 +26,7 @@ import {
   DRIVETRAIN_LABELS,
   FUEL_LABELS,
   TRANSMISSION_LABELS,
+  labelOf,
 } from '@/lib/labels';
 import type { Vehicle, VehicleSummary } from '@/types';
 import { NotFoundPage } from './NotFoundPage';
@@ -36,13 +37,13 @@ function specRows(v: Vehicle): { label: string; value: string }[] {
     ['Model', v.model],
     ['Trim', v.trim],
     ['Year', String(v.year)],
-    ['Condition', v.condition && CONDITION_LABELS[v.condition]],
-    ['Body type', v.bodyType && BODY_TYPE_LABELS[v.bodyType]],
+    ['Condition', v.condition && labelOf(CONDITION_LABELS, v.condition)],
+    ['Body type', v.bodyType && labelOf(BODY_TYPE_LABELS, v.bodyType)],
     ['Mileage', formatMileage(v.mileage, v.mileageUnit)],
     ['Engine', v.engineSize],
-    ['Fuel type', v.fuelType && FUEL_LABELS[v.fuelType]],
-    ['Transmission', v.transmission && TRANSMISSION_LABELS[v.transmission]],
-    ['Drivetrain', v.drivetrain && DRIVETRAIN_LABELS[v.drivetrain]],
+    ['Fuel type', v.fuelType && labelOf(FUEL_LABELS, v.fuelType)],
+    ['Transmission', v.transmission && labelOf(TRANSMISSION_LABELS, v.transmission)],
+    ['Drivetrain', v.drivetrain && labelOf(DRIVETRAIN_LABELS, v.drivetrain)],
     ['Exterior colour', v.exteriorColor],
     ['Interior colour', v.interiorColor],
     ['Location', v.location],
@@ -58,7 +59,7 @@ export function VehicleDetailsPage() {
   useDocumentMeta({
     title: vehicle ? `${vehicle.title} for sale` : 'Vehicle details',
     description: vehicle
-      ? `${vehicle.title} — ${formatPrice(vehicle.price, vehicle.currency)}. ${[vehicle.mileage !== undefined && formatMileage(vehicle.mileage, vehicle.mileageUnit), vehicle.transmission && TRANSMISSION_LABELS[vehicle.transmission], vehicle.fuelType && FUEL_LABELS[vehicle.fuelType]].filter(Boolean).join(', ')}. Available to view at Goddel Motors.`
+      ? `${vehicle.title} — ${formatPrice(vehicle.price, vehicle.currency)}. ${[vehicle.mileage !== undefined && formatMileage(vehicle.mileage, vehicle.mileageUnit), vehicle.transmission && labelOf(TRANSMISSION_LABELS, vehicle.transmission), vehicle.fuelType && labelOf(FUEL_LABELS, vehicle.fuelType)].filter(Boolean).join(', ')}. Available to view at Goddel Motors.`
       : undefined,
     image: vehicle?.images[0]?.variants?.large?.url ?? vehicle?.images[0]?.url,
     path: `/cars/${slug}`,
@@ -115,8 +116,8 @@ function VehicleDetailsContent({ vehicle, related }: { vehicle: Vehicle; related
   const quickSpecs = [
     { icon: CalendarDays, label: 'Year', value: String(vehicle.year) },
     { icon: Gauge, label: 'Mileage', value: formatMileage(vehicle.mileage, vehicle.mileageUnit) },
-    { icon: Settings2, label: 'Transmission', value: vehicle.transmission && TRANSMISSION_LABELS[vehicle.transmission] },
-    { icon: Fuel, label: 'Fuel', value: vehicle.fuelType && FUEL_LABELS[vehicle.fuelType] },
+    { icon: Settings2, label: 'Transmission', value: vehicle.transmission && labelOf(TRANSMISSION_LABELS, vehicle.transmission) },
+    { icon: Fuel, label: 'Fuel', value: vehicle.fuelType && labelOf(FUEL_LABELS, vehicle.fuelType) },
   ].filter((s) => s.value);
 
   return (

@@ -12,6 +12,7 @@ import { createEnquiry } from '../src/services/enquiryService.js';
 import { createEnquirySchema } from '../src/schemas/enquiry.js';
 import { updateSettingsSchema } from '../src/schemas/settings.js';
 import { stripControlChars } from '../src/schemas/common.js';
+import { createVehicleSchema, normalizeChoice } from '../src/schemas/vehicle.js';
 
 describe('role permissions', () => {
   it('gives the owner every permission', () => {
@@ -92,6 +93,30 @@ describe('settings validation', () => {
   it('accepts rates for only some currencies', () => {
     const r = updateSettingsSchema.safeParse({ dealershipName: 'G', defaultCurrency: 'GHS', supportedCurrencies: ['GHS', 'USD'], exchangeRates: { rates: { USD: 0.0625 } } });
     expect(r.success).toBe(true);
+  });
+});
+
+describe('vehicle choice fields', () => {
+  const base = { make: 'Toyota', model: 'Camry', year: 2018, price: 250000 };
+
+  it('maps typed wording onto known values', () => {
+    const v = createVehicleSchema.parse({ ...base, condition: 'Foreign used', transmission: 'automatic', drivetrain: '4WD', bodyType: 'Dual-clutch' });
+    expect(v.condition).toBe('foreign_used');
+    expect(v.transmission).toBe('automatic');
+    expect(v.drivetrain).toBe('4wd');
+    expect(v.bodyType).toBe('Dual-clutch');
+  });
+
+  it('keeps custom wording and clears blanks', () => {
+    const v = createVehicleSchema.parse({ ...base, bodyType: '  Limousine ', fuelType: '', transmission: null });
+    expect(v.bodyType).toBe('Limousine');
+    expect(v.fuelType).toBeNull();
+    expect(v.transmission).toBeNull();
+    expect(normalizeChoice(['plug_in_hybrid'], 'Plug-in Hybrid')).toBe('plug_in_hybrid');
+  });
+
+  it('limits custom wording to 40 characters', () => {
+    expect(createVehicleSchema.safeParse({ ...base, bodyType: 'x'.repeat(41) }).success).toBe(false);
   });
 });
 

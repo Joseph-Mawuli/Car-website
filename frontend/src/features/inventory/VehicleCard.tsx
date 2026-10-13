@@ -4,7 +4,7 @@ import type { VehicleSummary } from '@/types';
 import { AvailabilityBadge } from '@/components/ui/Badge';
 import { VehicleImage } from './VehicleImage';
 import { Price } from './Price';
-import { BODY_TYPE_LABELS, CONDITION_LABELS, FUEL_LABELS, TRANSMISSION_LABELS } from '@/lib/labels';
+import { BODY_TYPE_LABELS, CONDITION_LABELS, FUEL_LABELS, TRANSMISSION_LABELS, labelOf } from '@/lib/labels';
 import { formatMileage, cn } from '@/lib/format';
 
 interface Props {
@@ -17,13 +17,13 @@ interface Props {
 export function VehicleCard({ vehicle, priority, compact, sizes = '(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw' }: Props) {
   const specs = [
     { icon: CalendarDays, value: vehicle.year ? String(vehicle.year) : undefined, label: 'Year' },
-    { icon: Fuel, value: vehicle.fuelType && FUEL_LABELS[vehicle.fuelType], label: 'Fuel' },
-    { icon: CarFront, value: vehicle.bodyType && BODY_TYPE_LABELS[vehicle.bodyType], label: 'Body type' },
+    { icon: Fuel, value: vehicle.fuelType && labelOf(FUEL_LABELS, vehicle.fuelType), label: 'Fuel' },
+    { icon: CarFront, value: vehicle.bodyType && labelOf(BODY_TYPE_LABELS, vehicle.bodyType), label: 'Body type' },
     { icon: Gauge, value: formatMileage(vehicle.mileage, vehicle.mileageUnit), label: 'Mileage' },
-    { icon: Settings2, value: vehicle.transmission && TRANSMISSION_LABELS[vehicle.transmission], label: 'Transmission' },
+    { icon: Settings2, value: vehicle.transmission && labelOf(TRANSMISSION_LABELS, vehicle.transmission), label: 'Transmission' },
   ].filter((s) => Boolean(s.value));
 
-  const subtitle = [vehicle.trim, vehicle.condition && CONDITION_LABELS[vehicle.condition]].filter(Boolean).join(' · ');
+  const subtitle = [vehicle.trim, vehicle.condition && labelOf(CONDITION_LABELS, vehicle.condition)].filter(Boolean).join(' · ');
   const isSold = vehicle.availabilityStatus === 'sold';
 
   return (

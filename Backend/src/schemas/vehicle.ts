@@ -27,6 +27,19 @@ const optionalEnum = <T extends readonly [string, ...string[]]>(values: T) =>
     .optional()
     .transform((v) => (v === '' ? null : v));
 
+/** Maps "Foreign used", "foreign-used" etc. onto the known key; anything else is kept as typed. */
+export function normalizeChoice(values: readonly string[], raw: string): string {
+  const key = raw.trim().toLowerCase().replace(/[\s-]+/g, '_');
+  return values.includes(key) ? key : raw.trim();
+}
+
+/** One of the known values or the staff member's own wording; `null`/`''` clears it. */
+const optionalChoice = (values: readonly string[], max = 40) =>
+  z
+    .union([cleanText(max), z.null()])
+    .optional()
+    .transform((v) => (v === '' ? null : typeof v === 'string' ? normalizeChoice(values, v) : v));
+
 const vehicleFields = {
   make: cleanText(40).pipe(z.string().min(1, 'Make is required.')),
   model: cleanText(60).pipe(z.string().min(1, 'Model is required.')),
@@ -34,16 +47,16 @@ const vehicleFields = {
   year: z.coerce.number().int().min(1950, 'Year looks too early.').max(maxYear, `Year cannot be after ${maxYear}.`),
   price: z.coerce.number().min(0, 'Price cannot be negative.').max(1_000_000_000),
   currency: z.enum(CURRENCIES),
-  condition: optionalEnum(CONDITIONS),
+  condition: optionalChoice(CONDITIONS),
   availabilityStatus: z.enum(AVAILABILITY),
   visibility: z.enum(VISIBILITY),
-  bodyType: optionalEnum(BODY_TYPES),
+  bodyType: optionalChoice(BODY_TYPES),
   mileage: z.union([z.coerce.number().int().min(0).max(5_000_000), z.null()]).optional(),
   mileageUnit: optionalEnum(MILEAGE_UNITS),
   engineSize: optionalText(30),
-  fuelType: optionalEnum(FUEL_TYPES),
-  transmission: optionalEnum(TRANSMISSIONS),
-  drivetrain: optionalEnum(DRIVETRAINS),
+  fuelType: optionalChoice(FUEL_TYPES),
+  transmission: optionalChoice(TRANSMISSIONS),
+  drivetrain: optionalChoice(DRIVETRAINS),
   exteriorColor: optionalText(40),
   interiorColor: optionalText(40),
   description: optionalText(5000),
@@ -80,10 +93,10 @@ const csvOrSingle = z.string().max(40).optional();
 export const publicVehicleQuery = z.object({
   q: z.string().trim().max(60).optional(),
   make: csvOrSingle,
-  bodyType: z.enum(BODY_TYPES).optional(),
-  fuelType: z.enum(FUEL_TYPES).optional(),
-  transmission: z.enum(TRANSMISSIONS).optional(),
-  condition: z.enum(CONDITIONS).optional(),
+  bodyType: z.string().trim().max(40).optional(),
+  fuelType: z.string().trim().max(40).optional(),
+  transmission: z.string().trim().max(40).optional(),
+  condition: z.string().trim().max(40).optional(),
   availability: z.enum(['in_stock', 'available', 'reserved', 'sold', 'all']).default('in_stock'),
   minPrice: z.coerce.number().min(0).optional(),
   maxPrice: z.coerce.number().min(0).optional(),

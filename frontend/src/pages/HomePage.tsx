@@ -12,7 +12,7 @@ import { ButtonLink } from '@/components/ui/Button';
 import { useQuery } from '@/hooks/useQuery';
 import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 import { useSettings } from '@/providers/SettingsProvider';
-import { BODY_TYPE_LABELS } from '@/lib/labels';
+import { BODY_TYPE_LABELS, labelOf } from '@/lib/labels';
 import { DEFAULT_WHY_CHOOSE_US, WHY_CHOOSE_US_ICONS } from '@/lib/whyChooseUs';
 
 export function HomePage() {
@@ -95,7 +95,7 @@ export function HomePage() {
                   className="card flex flex-col items-center gap-2 px-3 py-5 text-center transition-[color,border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-brand-500/60 hover:text-brand-300"
                 >
                   <BodyTypeIcon type={type} className="h-10 w-10 text-brand-500" />
-                  <span className="text-sm font-semibold">{BODY_TYPE_LABELS[type]}</span>
+                  <span className="text-sm font-semibold">{labelOf(BODY_TYPE_LABELS, type)}</span>
                 </Link>
               </li>
             ))}

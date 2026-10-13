@@ -13,6 +13,9 @@ export const ENQUIRY_STATUSES = ['new', 'contacted', 'follow_up', 'closed'] as c
 export const PREFERRED_CONTACT = ['whatsapp', 'call', 'email'] as const;
 export const STAFF_STATUSES = ['active', 'disabled'] as const;
 
+/** A known key, or the wording staff typed when none of the known values fit. */
+export type Choice<T extends string> = T | (string & {});
+
 export type AvailabilityStatus = (typeof AVAILABILITY)[number];
 export type Visibility = (typeof VISIBILITY)[number];
 export type VehicleCondition = (typeof CONDITIONS)[number];

@@ -84,3 +84,21 @@ export const ROLE_LABELS: Record<StaffRole, string> = {
 export function optionsFrom<T extends string>(labels: Record<T, string>): { value: T; label: string }[] {
   return (Object.keys(labels) as T[]).map((value) => ({ value, label: labels[value] }));
 }
+
+/** Known values show their label; wording staff typed themselves is shown as entered. */
+export function labelOf(labels: Record<string, string>, value: string): string;
+export function labelOf(labels: Record<string, string>, value: string | undefined): string | undefined;
+export function labelOf(labels: Record<string, string>, value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  return Object.hasOwn(labels, value) ? labels[value] : value;
+}
+
+/** Turns typed text into a known key when it matches one (by key or label), otherwise keeps the text. */
+export function choiceFromText(labels: Record<string, string>, text: string): string {
+  const trimmed = text.trim();
+  if (!trimmed) return '';
+  const key = trimmed.toLowerCase().replace(/[\s-]+/g, '_');
+  if (Object.hasOwn(labels, key)) return key;
+  const byLabel = Object.keys(labels).find((k) => labels[k].toLowerCase() === trimmed.toLowerCase());
+  return byLabel ?? trimmed;
+}

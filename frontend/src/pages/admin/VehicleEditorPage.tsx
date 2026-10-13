@@ -1,12 +1,15 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ChevronLeft, ExternalLink, Save } from 'lucide-react';
 import { adminApi } from '@/features/admin/api';
 import { useAuth } from '@/features/admin/AuthProvider';
 import { PhotoManager } from '@/features/admin/PhotoManager';
+import { QuickFillPanel } from '@/features/admin/QuickFillPanel';
+import type { QuickFillField } from '@/features/admin/parseVehicleText';
+import { ComboField } from '@/components/ui/ComboField';
 import { AvailabilityBadge, Badge, VisibilityBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { SelectField, TextAreaField, TextField } from '@/components/ui/Field';
@@ -22,11 +25,24 @@ import {
   DRIVETRAIN_LABELS,
   FUEL_LABELS,
   TRANSMISSION_LABELS,
+  choiceFromText,
+  labelOf,
   optionsFrom,
 } from '@/lib/labels';
 import { CURRENCIES, CURRENCY_NAMES, type AdminVehicle } from '@/types';
 
 const maxYear = new Date().getFullYear() + 1;
+
+/** Type-or-pick fields hold the text shown to staff; known wording is mapped back to its key on save. */
+const choiceText = z.string().trim().max(40, 'Keep this under 40 characters.');
+const CHOICE_LABELS = {
+  condition: CONDITION_LABELS,
+  bodyType: BODY_TYPE_LABELS,
+  fuelType: FUEL_LABELS,
+  transmission: TRANSMISSION_LABELS,
+  drivetrain: DRIVETRAIN_LABELS,
+} as const;
+type ChoiceName = keyof typeof CHOICE_LABELS;
 
 const formSchema = z.object({
   make: z.string().trim().min(1, 'Make is required.').max(40),
@@ -40,14 +56,14 @@ const formSchema = z.object({
   currency: z.enum(CURRENCIES),
   availabilityStatus: z.enum(['available', 'reserved', 'sold']),
   visibility: z.enum(['published', 'draft', 'archived']),
-  condition: z.string(),
-  bodyType: z.string(),
+  condition: choiceText,
+  bodyType: choiceText,
   mileage: z.string().regex(/^\d*$/, 'Whole numbers only, without commas.'),
   mileageUnit: z.enum(['km', 'mi']),
   engineSize: z.string().trim().max(30),
-  fuelType: z.string(),
-  transmission: z.string(),
-  drivetrain: z.string(),
+  fuelType: choiceText,
+  transmission: choiceText,
+  drivetrain: choiceText,
   exteriorColor: z.string().trim().max(40),
   interiorColor: z.string().trim().max(40),
   location: z.string().trim().max(120),
@@ -94,14 +110,14 @@ function toForm(v: AdminVehicle): FormValues {
     currency: v.currency,
     availabilityStatus: v.availabilityStatus,
     visibility: v.visibility,
-    condition: v.condition ?? '',
-    bodyType: v.bodyType ?? '',
+    condition: labelOf(CONDITION_LABELS, v.condition) ?? '',
+    bodyType: labelOf(BODY_TYPE_LABELS, v.bodyType) ?? '',
     mileage: v.mileage !== undefined ? String(v.mileage) : '',
     mileageUnit: v.mileageUnit ?? 'km',
     engineSize: v.engineSize ?? '',
-    fuelType: v.fuelType ?? '',
-    transmission: v.transmission ?? '',
-    drivetrain: v.drivetrain ?? '',
+    fuelType: labelOf(FUEL_LABELS, v.fuelType) ?? '',
+    transmission: labelOf(TRANSMISSION_LABELS, v.transmission) ?? '',
+    drivetrain: labelOf(DRIVETRAIN_LABELS, v.drivetrain) ?? '',
     exteriorColor: v.exteriorColor ?? '',
     interiorColor: v.interiorColor ?? '',
     location: v.location ?? '',
@@ -115,6 +131,7 @@ function toForm(v: AdminVehicle): FormValues {
 /** Empty optional fields become `null` so the API clears them rather than storing invented values. */
 function toPayload(values: FormValues): Record<string, unknown> {
   const opt = (v: string) => (v.trim() === '' ? null : v.trim());
+  const choice = (name: ChoiceName) => opt(choiceFromText(CHOICE_LABELS[name], values[name]));
   return {
     make: values.make.trim(),
     model: values.model.trim(),
@@ -124,14 +141,14 @@ function toPayload(values: FormValues): Record<string, unknown> {
     currency: values.currency,
     availabilityStatus: values.availabilityStatus,
     visibility: values.visibility,
-    condition: opt(values.condition),
-    bodyType: opt(values.bodyType),
+    condition: choice('condition'),
+    bodyType: choice('bodyType'),
     mileage: values.mileage === '' ? null : Number(values.mileage),
     mileageUnit: values.mileage === '' ? null : values.mileageUnit,
     engineSize: opt(values.engineSize),
-    fuelType: opt(values.fuelType),
-    transmission: opt(values.transmission),
-    drivetrain: opt(values.drivetrain),
+    fuelType: choice('fuelType'),
+    transmission: choice('transmission'),
+    drivetrain: choice('drivetrain'),
     exteriorColor: opt(values.exteriorColor),
     interiorColor: opt(values.interiorColor),
     location: opt(values.location),
@@ -174,13 +191,53 @@ function VehicleEditor({ vehicle, onSaved, onReload }: { vehicle?: AdminVehicle;
   const [conflict, setConflict] = useState(false);
   const [images, setImages] = useState(vehicle?.images ?? []);
 
+  const [quickFilled, setQuickFilled] = useState<ReadonlySet<string>>(new Set());
+
   const {
     register,
+    control,
     handleSubmit,
     reset,
     setError,
+    setValue,
+    getValues,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<FormValues>({ resolver: zodResolver(formSchema), defaultValues: vehicle ? toForm(vehicle) : EMPTY });
+
+  const applyQuickFill = (values: Partial<Record<QuickFillField, string>>) => {
+    const applied = new Set<string>();
+    for (const [key, value] of Object.entries(values) as [QuickFillField, string][]) {
+      if (!value) continue;
+      if (key === 'currency' && !(CURRENCIES as readonly string[]).includes(value)) continue;
+      if (key === 'mileageUnit' && value !== 'km' && value !== 'mi') continue;
+      setValue(key, value as never, { shouldDirty: true, shouldValidate: Boolean(errors[key]) });
+      applied.add(key);
+    }
+    setQuickFilled(applied);
+  };
+  /** Gold outline on fields that quick fill just set, so staff know what to double-check. */
+  const hl = (name: keyof FormValues) => (quickFilled.has(name) ? 'border-brand-500/70 bg-brand-500/5' : undefined);
+
+  const choiceField = (name: ChoiceName, label: string) => (
+    <Controller
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <ComboField
+          ref={field.ref}
+          name={field.name}
+          label={label}
+          value={field.value}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          options={Object.values(CHOICE_LABELS[name])}
+          placeholder="Type or pick"
+          error={errors[name]?.message}
+          className={hl(name)}
+        />
+      )}
+    />
+  );
 
   useEffect(() => {
     if (window.location.hash === '#photos') document.getElementById('photos')?.scrollIntoView({ behavior: 'smooth' });
@@ -277,22 +334,31 @@ function VehicleEditor({ vehicle, onSaved, onReload }: { vehicle?: AdminVehicle;
         </Alert>
       )}
 
+      {!readOnly && (
+        <QuickFillPanel
+          defaultOpen={!vehicle}
+          disabled={isSubmitting}
+          isFilled={(field) => Boolean(getValues(field as keyof FormValues))}
+          onApply={applyQuickFill}
+        />
+      )}
+
       <fieldset disabled={readOnly || isSubmitting} className="space-y-5">
         <Section title="Vehicle details" description="Only enter details you have verified. Leave unknown fields blank.">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <TextField label="Make" required placeholder="e.g. Toyota" error={errors.make?.message} {...register('make')} />
-            <TextField label="Model" required placeholder="e.g. RAV4" error={errors.model?.message} {...register('model')} />
-            <TextField label="Trim / variant" placeholder="e.g. XLE" error={errors.trim?.message} {...register('trim')} />
-            <TextField label="Year" required inputMode="numeric" maxLength={4} error={errors.year?.message} {...register('year')} />
-            <SelectField label="Body type" placeholder="Not specified" options={optionsFrom(BODY_TYPE_LABELS)} {...register('bodyType')} />
-            <SelectField label="Condition" placeholder="Not specified" options={optionsFrom(CONDITION_LABELS)} {...register('condition')} />
+            <TextField label="Make" required placeholder="e.g. Toyota" error={errors.make?.message} className={hl('make')} {...register('make')} />
+            <TextField label="Model" required placeholder="e.g. RAV4" error={errors.model?.message} className={hl('model')} {...register('model')} />
+            <TextField label="Trim / variant" placeholder="e.g. XLE" error={errors.trim?.message} className={hl('trim')} {...register('trim')} />
+            <TextField label="Year" required inputMode="numeric" maxLength={4} error={errors.year?.message} className={hl('year')} {...register('year')} />
+            {choiceField('bodyType', 'Body type')}
+            {choiceField('condition', 'Condition')}
           </div>
         </Section>
 
         <Section title="Price & availability">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <TextField label="Price" required inputMode="decimal" placeholder="e.g. 280000" error={errors.price?.message} {...register('price')} />
-            <SelectField label="Currency" options={currencyOptions} {...register('currency')} />
+            <TextField label="Price" required inputMode="decimal" placeholder="e.g. 280000" error={errors.price?.message} className={hl('price')} {...register('price')} />
+            <SelectField label="Currency" options={currencyOptions} className={hl('currency')} {...register('currency')} />
             <SelectField label="Availability" options={optionsFrom(AVAILABILITY_LABELS)} {...register('availabilityStatus')} />
             <SelectField
               label="Visibility"
@@ -310,30 +376,44 @@ function VehicleEditor({ vehicle, onSaved, onReload }: { vehicle?: AdminVehicle;
         <Section title="Specifications">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="grid grid-cols-[1fr_90px] gap-2">
-              <TextField label="Mileage" inputMode="numeric" placeholder="e.g. 45000" error={errors.mileage?.message} {...register('mileage')} />
-              <SelectField label="Unit" options={[{ value: 'km', label: 'km' }, { value: 'mi', label: 'mi' }]} {...register('mileageUnit')} />
+              <TextField label="Mileage" inputMode="numeric" placeholder="e.g. 45000" error={errors.mileage?.message} className={hl('mileage')} {...register('mileage')} />
+              <SelectField label="Unit" options={[{ value: 'km', label: 'km' }, { value: 'mi', label: 'mi' }]} className={hl('mileageUnit')} {...register('mileageUnit')} />
             </div>
-            <TextField label="Engine" placeholder="e.g. 2.5L 4-cylinder" error={errors.engineSize?.message} {...register('engineSize')} />
-            <SelectField label="Fuel type" placeholder="Not specified" options={optionsFrom(FUEL_LABELS)} {...register('fuelType')} />
-            <SelectField label="Transmission" placeholder="Not specified" options={optionsFrom(TRANSMISSION_LABELS)} {...register('transmission')} />
-            <SelectField label="Drivetrain" placeholder="Not specified" options={optionsFrom(DRIVETRAIN_LABELS)} {...register('drivetrain')} />
-            <TextField label="Exterior colour" error={errors.exteriorColor?.message} {...register('exteriorColor')} />
-            <TextField label="Interior colour" error={errors.interiorColor?.message} {...register('interiorColor')} />
-            <TextField label="Vehicle location" placeholder="e.g. Accra showroom" error={errors.location?.message} {...register('location')} />
+            <TextField label="Engine" placeholder="e.g. 2.5L 4-cylinder" error={errors.engineSize?.message} className={hl('engineSize')} {...register('engineSize')} />
+            {choiceField('fuelType', 'Fuel type')}
+            {choiceField('transmission', 'Transmission')}
+            {choiceField('drivetrain', 'Drivetrain')}
+            <TextField label="Exterior colour" error={errors.exteriorColor?.message} className={hl('exteriorColor')} {...register('exteriorColor')} />
+            <TextField label="Interior colour" error={errors.interiorColor?.message} className={hl('interiorColor')} {...register('interiorColor')} />
+            <TextField label="Vehicle location" placeholder="e.g. Accra showroom" error={errors.location?.message} className={hl('location')} {...register('location')} />
           </div>
         </Section>
 
         <Section title="Description & features">
           <div className="grid gap-4 lg:grid-cols-2">
-            <TextAreaField label="Description" rows={7} hint="Describe the vehicle using verified information only." error={errors.description?.message} {...register('description')} />
-            <TextAreaField label="Features & equipment" rows={7} hint="One feature per line, e.g. Reverse camera" error={errors.featuresText?.message} {...register('featuresText')} />
+            <TextAreaField
+              label="Description"
+              rows={7}
+              hint="Describe the vehicle using verified information only."
+              error={errors.description?.message}
+              className={hl('description')}
+              {...register('description')}
+            />
+            <TextAreaField
+              label="Features & equipment"
+              rows={7}
+              hint="One feature per line, e.g. Reverse camera"
+              error={errors.featuresText?.message}
+              className={hl('featuresText')}
+              {...register('featuresText')}
+            />
           </div>
         </Section>
 
         <Section title="Condition" description="Being upfront about known issues builds trust with buyers.">
           <div className="grid gap-4 lg:grid-cols-2">
-            <TextAreaField label="Condition notes" rows={4} error={errors.conditionNotes?.message} {...register('conditionNotes')} />
-            <TextAreaField label="Known defects" rows={4} error={errors.knownDefects?.message} {...register('knownDefects')} />
+            <TextAreaField label="Condition notes" rows={4} error={errors.conditionNotes?.message} className={hl('conditionNotes')} {...register('conditionNotes')} />
+            <TextAreaField label="Known defects" rows={4} error={errors.knownDefects?.message} className={hl('knownDefects')} {...register('knownDefects')} />
           </div>
         </Section>
       </fieldset>

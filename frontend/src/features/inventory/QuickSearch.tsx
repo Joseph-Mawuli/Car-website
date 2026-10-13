@@ -4,7 +4,7 @@ import { Search } from 'lucide-react';
 import type { VehicleFacets } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { SelectField } from '@/components/ui/Field';
-import { BODY_TYPE_LABELS } from '@/lib/labels';
+import { BODY_TYPE_LABELS, labelOf } from '@/lib/labels';
 import { useSettings } from '@/providers/SettingsProvider';
 import { useDisplayCurrency } from '@/providers/CurrencyProvider';
 import { CurrencySwitcher } from '@/components/layout/CurrencySwitcher';
@@ -100,7 +100,7 @@ export function QuickSearch({ facets }: { facets?: VehicleFacets }) {
         value={bodyType}
         onChange={(e) => setBodyType(e.target.value)}
         placeholder="Any type"
-        options={(facets?.bodyTypes ?? []).map((b) => ({ value: b, label: BODY_TYPE_LABELS[b] }))}
+        options={(facets?.bodyTypes ?? []).map((b) => ({ value: b, label: labelOf(BODY_TYPE_LABELS, b) }))}
       />
       <fieldset className="col-span-2 lg:col-span-1">
         <legend className="sr-only">Price ({displayCurrency})</legend>

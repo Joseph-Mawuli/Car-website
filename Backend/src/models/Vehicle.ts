@@ -1,16 +1,12 @@
 import { Schema, model, type Types, type HydratedDocument } from 'mongoose';
 import {
   AVAILABILITY,
-  BODY_TYPES,
-  CONDITIONS,
   CURRENCIES,
-  DRIVETRAINS,
-  FUEL_TYPES,
   MILEAGE_UNITS,
-  TRANSMISSIONS,
   VISIBILITY,
   type AvailabilityStatus,
   type BodyType,
+  type Choice,
   type CurrencyCode,
   type Drivetrain,
   type FuelType,
@@ -53,16 +49,16 @@ export interface VehicleRecord {
   year: number;
   price: number;
   currency: CurrencyCode;
-  condition?: VehicleCondition;
+  condition?: Choice<VehicleCondition>;
   availabilityStatus: AvailabilityStatus;
   visibility: Visibility;
-  bodyType?: BodyType;
+  bodyType?: Choice<BodyType>;
   mileage?: number;
   mileageUnit?: MileageUnit;
   engineSize?: string;
-  fuelType?: FuelType;
-  transmission?: Transmission;
-  drivetrain?: Drivetrain;
+  fuelType?: Choice<FuelType>;
+  transmission?: Choice<Transmission>;
+  drivetrain?: Choice<Drivetrain>;
   exteriorColor?: string;
   interiorColor?: string;
   description?: string;
@@ -112,16 +108,16 @@ const vehicleSchema = new Schema<VehicleRecord>(
     year: { type: Number, required: true, min: 1950, max: 2100 },
     price: { type: Number, required: true, min: 0 },
     currency: { type: String, enum: CURRENCIES, required: true, default: 'GHS' },
-    condition: { type: String, enum: CONDITIONS },
+    condition: { type: String, trim: true, maxlength: 40 },
     availabilityStatus: { type: String, enum: AVAILABILITY, required: true, default: 'available' },
     visibility: { type: String, enum: VISIBILITY, required: true, default: 'draft' },
-    bodyType: { type: String, enum: BODY_TYPES },
+    bodyType: { type: String, trim: true, maxlength: 40 },
     mileage: { type: Number, min: 0 },
     mileageUnit: { type: String, enum: MILEAGE_UNITS },
     engineSize: { type: String, trim: true, maxlength: 30 },
-    fuelType: { type: String, enum: FUEL_TYPES },
-    transmission: { type: String, enum: TRANSMISSIONS },
-    drivetrain: { type: String, enum: DRIVETRAINS },
+    fuelType: { type: String, trim: true, maxlength: 40 },
+    transmission: { type: String, trim: true, maxlength: 40 },
+    drivetrain: { type: String, trim: true, maxlength: 40 },
     exteriorColor: { type: String, trim: true, maxlength: 40 },
     interiorColor: { type: String, trim: true, maxlength: 40 },
     description: { type: String, trim: true, maxlength: 5000 },

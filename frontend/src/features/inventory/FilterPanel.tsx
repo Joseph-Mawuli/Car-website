@@ -2,7 +2,7 @@ import { useState, type ChangeEvent, type FormEvent } from 'react';
 import type { VehicleFacets } from '@/types';
 import { SelectField } from '@/components/ui/Field';
 import { Button } from '@/components/ui/Button';
-import { BODY_TYPE_LABELS, CONDITION_LABELS, FUEL_LABELS, TRANSMISSION_LABELS } from '@/lib/labels';
+import { BODY_TYPE_LABELS, CONDITION_LABELS, FUEL_LABELS, TRANSMISSION_LABELS, labelOf } from '@/lib/labels';
 import { AVAILABILITY_OPTIONS, listedPriceRange, listedPriceRangeHint, PRICE_CURRENCY_KEY, priceFilterNote, type FilterKey } from './filters';
 import { useSettings } from '@/providers/SettingsProvider';
 import { CurrencySwitcher } from '@/components/layout/CurrencySwitcher';
@@ -54,25 +54,25 @@ export function FilterPanel({ params, facets, currency, onChange, onReset }: Pro
       <SelectField
         label="Body type"
         placeholder="Any type"
-        options={(facets?.bodyTypes ?? []).map((b) => ({ value: b, label: BODY_TYPE_LABELS[b] }))}
+        options={(facets?.bodyTypes ?? []).map((b) => ({ value: b, label: labelOf(BODY_TYPE_LABELS, b) }))}
         {...select('bodyType')}
       />
       <SelectField
         label="Fuel type"
         placeholder="Any fuel"
-        options={(facets?.fuelTypes ?? []).map((f) => ({ value: f, label: FUEL_LABELS[f] }))}
+        options={(facets?.fuelTypes ?? []).map((f) => ({ value: f, label: labelOf(FUEL_LABELS, f) }))}
         {...select('fuelType')}
       />
       <SelectField
         label="Transmission"
         placeholder="Any transmission"
-        options={(facets?.transmissions ?? []).map((t) => ({ value: t, label: TRANSMISSION_LABELS[t] }))}
+        options={(facets?.transmissions ?? []).map((t) => ({ value: t, label: labelOf(TRANSMISSION_LABELS, t) }))}
         {...select('transmission')}
       />
       <SelectField
         label="Condition"
         placeholder="Any condition"
-        options={(facets?.conditions ?? []).map((c) => ({ value: c, label: CONDITION_LABELS[c] }))}
+        options={(facets?.conditions ?? []).map((c) => ({ value: c, label: labelOf(CONDITION_LABELS, c) }))}
         {...select('condition')}
       />
       <SelectField

@@ -1,4 +1,4 @@
-import type { BodyType } from '@/types';
+import type { BodyType, Choice } from '@/types';
 
 /** Simple side-profile line icons so categories are recognisable at a glance. */
 const PATHS: Record<BodyType, string> = {
@@ -15,10 +15,10 @@ const PATHS: Record<BodyType, string> = {
   other: 'M3 16v-3l3-1 3-3.5h6l4 4 2 .5V16M3 16h2m4 0h6m4 0h2',
 };
 
-export function BodyTypeIcon({ type, className }: { type: BodyType; className?: string }) {
+export function BodyTypeIcon({ type, className }: { type: Choice<BodyType>; className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d={PATHS[type]} />
+      <path d={Object.hasOwn(PATHS, type) ? PATHS[type as BodyType] : PATHS.other} />
       <circle cx="7" cy="16.5" r="2" />
       <circle cx="17" cy="16.5" r="2" />
     </svg>
