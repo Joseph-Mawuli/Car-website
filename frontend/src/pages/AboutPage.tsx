@@ -1,11 +1,9 @@
-import { BadgeCheck, CarFront, MessageCircle, ShieldCheck } from 'lucide-react';
 import { PageHero } from '@/components/sections/PageHero';
 import { ContactBand } from '@/components/sections/ContactBand';
 import { ButtonLink } from '@/components/ui/Button';
 import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 import { useSettings } from '@/providers/SettingsProvider';
-
-const ICONS = [BadgeCheck, MessageCircle, ShieldCheck, CarFront];
+import { DEFAULT_WHY_CHOOSE_US, WHY_CHOOSE_US_ICONS } from '@/lib/whyChooseUs';
 
 /** Neutral placeholder shown until the owner adds the dealership's own story in Settings. */
 const PLACEHOLDER_BODY =
@@ -15,13 +13,7 @@ export function AboutPage() {
   const { settings } = useSettings();
   useDocumentMeta({ title: 'About Us', description: 'Learn about Goddel Motors and how to buy your next vehicle with us.', path: '/about' });
 
-  const values = settings.whyChooseUs.length
-    ? settings.whyChooseUs
-    : [
-        { title: 'Clear listings', body: 'Prices, photos and confirmed details for every vehicle.' },
-        { title: 'Direct contact', body: 'Speak with our team by WhatsApp, phone or enquiry form.' },
-        { title: 'Current availability', body: 'Each listing shows whether a car is available, reserved or sold.' },
-      ];
+  const values = settings.whyChooseUs.length ? settings.whyChooseUs : DEFAULT_WHY_CHOOSE_US;
 
   return (
     <>
@@ -57,7 +49,7 @@ export function AboutPage() {
         </h2>
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {values.map((item, i) => {
-            const Icon = ICONS[i % ICONS.length];
+            const Icon = WHY_CHOOSE_US_ICONS[i % WHY_CHOOSE_US_ICONS.length];
             return (
               <li key={item.title} className="card p-6">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-500/10 text-brand-500">

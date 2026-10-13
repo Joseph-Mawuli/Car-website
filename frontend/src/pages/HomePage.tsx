@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { ArrowRight, BadgeCheck, CarFront, MessageCircle, ShieldCheck } from 'lucide-react';
+import { ArrowRight, CarFront } from 'lucide-react';
 import { Hero } from '@/components/sections/Hero';
 import { ContactBand } from '@/components/sections/ContactBand';
 import { BrandsSection } from '@/components/sections/BrandsSection';
@@ -13,15 +13,7 @@ import { useQuery } from '@/hooks/useQuery';
 import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 import { useSettings } from '@/providers/SettingsProvider';
 import { BODY_TYPE_LABELS } from '@/lib/labels';
-
-const WHY_ICONS = [BadgeCheck, MessageCircle, ShieldCheck, CarFront];
-
-/** Neutral, editable defaults that describe how the site works rather than making business claims. */
-const DEFAULT_WHY = [
-  { title: 'Clear listings', body: 'Every listing shows the price and the details we have confirmed for that vehicle.' },
-  { title: 'Talk to us directly', body: 'Reach the dealership by WhatsApp, phone or the enquiry form — no account needed.' },
-  { title: 'Up-to-date availability', body: 'Vehicles are marked available, reserved or sold as soon as their status changes.' },
-];
+import { DEFAULT_WHY_CHOOSE_US, WHY_CHOOSE_US_ICONS } from '@/lib/whyChooseUs';
 
 export function HomePage() {
   const { settings } = useSettings();
@@ -35,7 +27,7 @@ export function HomePage() {
   const facets = useQuery('facets', (signal) => getVehicleFacets(signal));
   const featured = useQuery('featured', (signal) => listVehicles({ sort: 'newest', limit: 8, availability: 'in_stock' }, signal));
 
-  const why = settings.whyChooseUs.length ? settings.whyChooseUs : DEFAULT_WHY;
+  const why = settings.whyChooseUs.length ? settings.whyChooseUs : DEFAULT_WHY_CHOOSE_US;
   const bodyTypes = facets.data?.bodyTypes ?? [];
 
   return (
@@ -121,7 +113,7 @@ export function HomePage() {
         </div>
         <ul className="card grid divide-y divide-line sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-3 lg:divide-x">
           {why.map((item, i) => {
-            const Icon = WHY_ICONS[i % WHY_ICONS.length];
+            const Icon = WHY_CHOOSE_US_ICONS[i % WHY_CHOOSE_US_ICONS.length];
             return (
               <li key={item.title} className="flex flex-col items-center px-6 py-7 text-center">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full border border-brand-500/40 text-brand-500">
