@@ -104,7 +104,7 @@ function toPayload(v: Values): Record<string, unknown> {
 
 function Section({ title, description, children }: { title: string; description?: ReactNode; children: ReactNode }) {
   return (
-    <section className="card p-4 sm:p-6">
+    <section className="sm:rounded-2xl sm:border sm:border-line sm:bg-surface sm:p-6 sm:shadow-card">
       <h2 className="text-lg font-semibold">{title}</h2>
       {description && <p className="mt-1 text-sm text-muted">{description}</p>}
       <div className="mt-5 space-y-4">{children}</div>
@@ -254,7 +254,7 @@ function SettingsForm({ settings, onSaved, onLogoChange }: { settings: AdminSett
         </Alert>
       )}
 
-      <div className="space-y-5">
+      <div className="space-y-10 sm:space-y-5">
         <Section title="Branding" description="Your logo, business name and motto appear in the header, footer, admin area and messages to customers.">
           <LogoUploader logoUrl={settings.logoUrl} onChange={onLogoChange} />
           <div className="grid gap-4 sm:grid-cols-2">
@@ -403,7 +403,7 @@ function SettingsForm({ settings, onSaved, onLogoChange }: { settings: AdminSett
 
         <Section title="Why choose us" description="Shown on the homepage. Up to 6 points.">
           {why.fields.map((f, i) => (
-            <div key={f.id} className="border-t border-line pt-4 first:border-t-0 first:pt-0">
+            <div key={f.id} className="pt-2 first:pt-0">
               <div className="mb-1 flex items-center justify-between">
                 <p className="text-sm font-semibold text-brand-500">Point {i + 1}</p>
                 <Button variant="ghost" size="icon" aria-label={`Remove point ${i + 1}`} onClick={() => why.remove(i)} className="-mr-2">
