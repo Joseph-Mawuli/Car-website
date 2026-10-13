@@ -25,30 +25,31 @@ export function AuditLogPage() {
   const canDelete = can('audit:delete');
   const [params, setParams] = useSearchParams();
   const page = Number(params.get('page') ?? 1) || 1;
-  const { data, error, isLoading, reload } = useQuery(`audit:${page}`, (signal) => adminApi.auditLogs(page, signal));
+  const { data, error, isLoading, reload, setData } = useQuery(`audit:${page}`, (signal) => adminApi.auditLogs(page, signal));
   const [confirm, setConfirm] = useState<{ kind: 'one'; entry: AuditLogEntry } | { kind: 'all' } | null>(null);
-  const [busy, setBusy] = useState(false);
 
+  // The list updates as soon as the owner confirms; the server catches up in the background.
   const onConfirm = async () => {
-    if (!confirm) return;
-    setBusy(true);
+    if (!confirm || !data) return;
+    const action = confirm;
+    const previous = data;
+    setConfirm(null);
     try {
-      if (confirm.kind === 'one') {
-        await adminApi.deleteAuditLog(confirm.entry.id);
+      if (action.kind === 'one') {
+        setData((d) => (d ? { ...d, items: d.items.filter((i) => i.id !== action.entry.id), total: Math.max(0, d.total - 1) } : d!));
+        await adminApi.deleteAuditLog(action.entry.id);
         notify('Audit entry deleted');
-        if (data && data.items.length === 1 && page > 1) setParams(page - 1 > 1 ? { page: String(page - 1) } : {});
-        else reload();
+        if (previous.items.length === 1 && page > 1) setParams(page - 1 > 1 ? { page: String(page - 1) } : {});
       } else {
+        setData((d) => ({ ...d!, items: [], total: 0, page: 1, totalPages: 1 }));
         const { removed } = await adminApi.clearAuditLog();
         notify(`Audit log cleared — ${removed} ${removed === 1 ? 'entry' : 'entries'} removed`);
         if (page > 1) setParams({});
         else reload();
       }
-      setConfirm(null);
     } catch (err) {
+      setData(previous);
       notify(errorMessage(err), 'error');
-    } finally {
-      setBusy(false);
     }
   };
 
@@ -122,9 +123,8 @@ export function AuditLogPage() {
           )
         }
         confirmLabel={confirm?.kind === 'all' ? 'Clear all' : 'Delete entry'}
-        loading={busy}
         onConfirm={onConfirm}
-        onCancel={() => !busy && setConfirm(null)}
+        onCancel={() => setConfirm(null)}
       />
     </>
   );

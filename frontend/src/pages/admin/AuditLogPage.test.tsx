@@ -27,7 +27,7 @@ describe('AuditLogPage', () => {
     expect(screen.queryByRole('button', { name: /delete audit entry/i })).not.toBeInTheDocument();
   });
 
-  it('lets owners delete one entry or clear everything after confirming', async () => {
+  it('lets owners delete one entry after confirming', async () => {
     permissions = ['audit:read', 'audit:delete'];
     const calls: { path: string; method?: string; body?: unknown }[] = [];
     renderWithProviders(<AuditLogPage />, { api: api(calls) });
@@ -35,10 +35,37 @@ describe('AuditLogPage', () => {
     await userEvent.click(await screen.findByRole('button', { name: /delete audit entry/i }));
     await userEvent.click(screen.getByRole('button', { name: 'Delete entry' }));
     await waitFor(() => expect(calls).toContainEqual({ path: '/admin/audit-logs/a1', method: 'DELETE', body: undefined }));
+    expect(await screen.findByText('Audit entry deleted')).toBeInTheDocument();
+  });
+
+  it('lets owners clear everything after confirming', async () => {
+    permissions = ['audit:read', 'audit:delete'];
+    const calls: { path: string; method?: string; body?: unknown }[] = [];
+    renderWithProviders(<AuditLogPage />, { api: api(calls) });
 
     await userEvent.click(await screen.findByRole('button', { name: /clear all/i }));
     expect(screen.getByText(/can't be undone/i)).toBeInTheDocument();
     await userEvent.click(screen.getAllByRole('button', { name: 'Clear all' }).at(-1)!);
     await waitFor(() => expect(calls).toContainEqual({ path: '/admin/audit-logs', method: 'DELETE', body: { confirm: true } }));
+  });
+
+  it('empties the list as soon as the owner confirms, and restores it if the server refuses', async () => {
+    permissions = ['audit:read', 'audit:delete'];
+    let fail: (e: Error) => void = () => {};
+    renderWithProviders(<AuditLogPage />, {
+      api: (_path, options) =>
+        options.method === 'DELETE'
+          ? new Promise((_resolve, reject) => (fail = reject))
+          : Promise.resolve({ items: [entry], page: 1, limit: 30, total: 1, totalPages: 1 }),
+    });
+
+    await userEvent.click(await screen.findByRole('button', { name: /clear all/i }));
+    await userEvent.click(screen.getAllByRole('button', { name: 'Clear all' }).at(-1)!);
+    expect(screen.queryByText('Changed price')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    fail(new Error('Server unavailable'));
+    expect(await screen.findByText('Changed price')).toBeInTheDocument();
+    expect(await screen.findByText('Server unavailable')).toBeInTheDocument();
   });
 });
