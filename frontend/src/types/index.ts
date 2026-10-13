@@ -223,7 +223,8 @@ export type Permission =
   | 'enquiries:assign'
   | 'staff:manage'
   | 'settings:manage'
-  | 'audit:read';
+  | 'audit:read'
+  | 'audit:delete';
 
 export interface StaffMember {
   id: string;

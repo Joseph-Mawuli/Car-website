@@ -35,6 +35,7 @@ const ALL: Permission[] = [
   'staff:manage',
   'settings:manage',
   'audit:read',
+  'audit:delete',
 ];
 const ROLE_PERMISSIONS: Record<StaffRole, Permission[]> = {
   owner: ALL,
@@ -500,6 +501,19 @@ export async function handle(path: string, opts: Opts): Promise<unknown> {
   }
 
   if (r[0] === 'audit-logs') {
+    if (method === 'DELETE') {
+      requirePerm('audit:delete');
+      if (r[1]) {
+        const index = audit.findIndex((a) => a.id === r[1]);
+        if (index < 0) throw new ApiError(404, 'not_found', 'Audit entry not found.');
+        audit.splice(index, 1);
+        return undefined;
+      }
+      const removed = audit.length;
+      audit.length = 0;
+      log('audit.clear', `Cleared the audit log (${removed} ${removed === 1 ? 'entry' : 'entries'} removed)`);
+      return { removed };
+    }
     requirePerm('audit:read');
     return paginate(audit, Number(q.page ?? 1), 30);
   }

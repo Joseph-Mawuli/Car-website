@@ -8,7 +8,7 @@ import * as enquiries from '../services/enquiryService.js';
 import * as staff from '../services/staffService.js';
 import * as vehicles from '../services/vehicleService.js';
 import { getSettingsRecord, serializeAdminSettings, updateSettings } from '../services/settingsService.js';
-import { listAuditLogs, recordAudit } from '../services/auditService.js';
+import { clearAuditLogs, deleteAuditLog, listAuditLogs, recordAudit } from '../services/auditService.js';
 import { removeLogo, setLogo } from '../services/logoService.js';
 import type { SetupLinkDelivery } from '../services/setupLinkDelivery.js';
 import { hasPermission } from '../lib/permissions.js';
@@ -164,4 +164,21 @@ const auditQuery = z.object({ ...pageQuery, limit: z.coerce.number().int().min(1
 export async function auditLogs(req: Request, res: Response) {
   const { page, limit } = auditQuery.parse(req.query);
   res.json(await listAuditLogs(page, limit));
+}
+
+export async function removeAuditLog(req: Request, res: Response) {
+  const { id } = idParams.parse(req.params);
+  await deleteAuditLog(id);
+  res.status(204).end();
+}
+
+/** Requires an explicit `{ confirm: true }` so a stray request can't wipe the log. */
+const clearAuditSchema = z.object({ confirm: z.literal(true, { message: 'Confirm that you want to clear the audit log.' }) });
+
+export async function clearAudit(req: Request, res: Response) {
+  clearAuditSchema.parse(req.body ?? {});
+  const removed = await clearAuditLogs();
+  // Leave one entry so it's always visible who cleared the log and when.
+  await recordAudit(req.staff!, { action: 'audit.clear', targetType: 'audit', summary: `Cleared the audit log (${removed} ${removed === 1 ? 'entry' : 'entries'} removed)` });
+  res.json({ removed });
 }

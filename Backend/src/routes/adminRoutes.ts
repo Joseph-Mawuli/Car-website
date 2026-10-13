@@ -53,6 +53,8 @@ export function adminRoutes(authDeps: AuthDeps, limiters: RateLimiters): Router 
   router.delete('/settings/logo', requirePermission('settings:manage'), admin.deleteLogo);
 
   router.get('/audit-logs', requirePermission('audit:read'), admin.auditLogs);
+  router.delete('/audit-logs', requirePermission('audit:delete'), admin.clearAudit);
+  router.delete('/audit-logs/:id', requirePermission('audit:delete'), admin.removeAuditLog);
 
   return router;
 }

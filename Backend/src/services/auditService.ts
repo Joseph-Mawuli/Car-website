@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import { AuditLog } from '../models/AuditLog.js';
 import type { StaffPrincipal } from '../middleware/auth.js';
 import { logger } from '../config/logger.js';
+import { notFound } from '../lib/errors.js';
 
 export interface AuditEntry {
   action: string;
@@ -24,6 +25,17 @@ export async function recordAudit(actor: StaffPrincipal, entry: AuditEntry): Pro
   } catch (error) {
     logger.error('Failed to write audit log', { action: entry.action, error });
   }
+}
+
+export async function deleteAuditLog(id: string): Promise<void> {
+  const res = await AuditLog.deleteOne({ _id: new Types.ObjectId(id) });
+  if (res.deletedCount === 0) throw notFound('Audit entry not found.');
+}
+
+/** Removes every entry and returns how many were deleted. */
+export async function clearAuditLogs(): Promise<number> {
+  const res = await AuditLog.deleteMany({});
+  return res.deletedCount;
 }
 
 export async function listAuditLogs(page: number, limit: number) {

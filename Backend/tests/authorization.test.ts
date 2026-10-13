@@ -64,6 +64,8 @@ vi.mock('../src/services/settingsService.js', () => ({
 vi.mock('../src/services/auditService.js', () => ({
   recordAudit: vi.fn(async () => undefined),
   listAuditLogs: vi.fn(async () => ({ items: [], page: 1, limit: 30, total: 0, totalPages: 1 })),
+  deleteAuditLog: vi.fn(async () => undefined),
+  clearAuditLogs: vi.fn(async () => 3),
 }));
 
 const vehicleService = await import('../src/services/vehicleService.js');
@@ -102,6 +104,8 @@ const CASES: Record<string, Case> = {
   getSettings: { method: 'get', path: '/api/v1/admin/settings' },
   putSettings: { method: 'put', path: '/api/v1/admin/settings', body: settingsBody },
   auditLogs: { method: 'get', path: '/api/v1/admin/audit-logs' },
+  deleteAuditEntry: { method: 'delete', path: `/api/v1/admin/audit-logs/${VEHICLE_ID}` },
+  clearAuditLog: { method: 'delete', path: '/api/v1/admin/audit-logs', body: { confirm: true } },
   renameSelf: { method: 'patch', path: '/api/v1/admin/me', body: { displayName: 'New Name' } },
 };
 
@@ -179,6 +183,19 @@ describe('authentication', () => {
     const res = await request(app).patch('/api/v1/admin/me').set('Authorization', 'Bearer sales-token').send({ displayName: ' ' });
     expect(res.status).toBe(400);
     expect(staffService.updateOwnName).not.toHaveBeenCalled();
+  });
+
+  it('only clears the audit log with explicit confirmation, and records who cleared it', async () => {
+    const auditService = await import('../src/services/auditService.js');
+    vi.mocked(auditService.clearAuditLogs).mockClear();
+    const refused = await request(app).delete('/api/v1/admin/audit-logs').set('Authorization', 'Bearer owner-token').send({});
+    expect(refused.status).toBe(400);
+    expect(auditService.clearAuditLogs).not.toHaveBeenCalled();
+
+    const res = await request(app).delete('/api/v1/admin/audit-logs').set('Authorization', 'Bearer owner-token').send({ confirm: true });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ removed: 3 });
+    expect(auditService.recordAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'audit.clear' }));
   });
 
   it.each(Object.entries(CASES))('blocks anonymous access to %s', async (_name, c) => {

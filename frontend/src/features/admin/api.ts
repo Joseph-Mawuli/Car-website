@@ -75,4 +75,6 @@ export const adminApi = {
   deleteLogo: () => apiRequest<AdminSettings>('/admin/settings/logo', { ...auth, method: 'DELETE' }),
 
   auditLogs: (page: number, signal?: AbortSignal) => apiRequest<Paginated<AuditLogEntry>>('/admin/audit-logs', { ...auth, query: { page }, signal }),
+  deleteAuditLog: (id: string) => apiRequest<void>(`/admin/audit-logs/${id}`, { ...auth, method: 'DELETE' }),
+  clearAuditLog: () => apiRequest<{ removed: number }>('/admin/audit-logs', { ...auth, method: 'DELETE', body: { confirm: true } }),
 };
