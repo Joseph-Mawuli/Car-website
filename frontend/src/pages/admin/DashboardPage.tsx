@@ -12,21 +12,26 @@ import { formatRelative, cn } from '@/lib/format';
 function StatCard({ label, value, icon: Icon, tone, to }: { label: string; value: number | undefined; icon: typeof CarFront; tone: string; to?: string }) {
   const body = (
     <>
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold text-muted">{label}</span>
-        <span className={cn('flex h-9 w-9 items-center justify-center rounded-xl', tone)}>
-          <Icon className="h-4.5 w-4.5" aria-hidden />
+      <div className="flex items-center justify-between gap-2">
+        <span className="truncate text-xs font-semibold text-muted sm:text-sm">{label}</span>
+        <span className={cn('flex h-7 w-7 shrink-0 items-center justify-center rounded-lg sm:h-9 sm:w-9 sm:rounded-xl', tone)}>
+          <Icon className="h-4 w-4 sm:h-4.5 sm:w-4.5" aria-hidden />
         </span>
       </div>
-      {value === undefined ? <div className="skeleton mt-3 h-8 w-12" /> : <p className="mt-2 font-display text-3xl font-bold">{value}</p>}
+      {value === undefined ? (
+        <div className="skeleton mt-2 h-7 w-10 sm:mt-3 sm:h-8 sm:w-12" />
+      ) : (
+        <p className="mt-1 font-display text-2xl font-bold leading-tight sm:mt-2 sm:text-3xl">{value}</p>
+      )}
     </>
   );
+  const className = 'card block px-3.5 py-3 last:odd:col-span-2 sm:p-5 sm:last:odd:col-span-1';
   return to ? (
-    <Link to={to} className="card block p-4 transition-colors hover:border-brand-500/50 sm:p-5">
+    <Link to={to} className={cn(className, 'transition-colors hover:border-brand-500/50')}>
       {body}
     </Link>
   ) : (
-    <div className="card p-4 sm:p-5">{body}</div>
+    <div className={className}>{body}</div>
   );
 }
 
@@ -51,7 +56,7 @@ export function DashboardPage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-5">
         <StatCard label="Total vehicles" value={v?.total} icon={CarFront} tone="bg-brand-500/12 text-brand-600 dark:text-brand-400" to="/admin/inventory" />
         <StatCard label="Available" value={v?.available} icon={CheckCircle2} tone="bg-emerald-500/12 text-success" to="/admin/inventory?availability=available" />
         <StatCard label="Reserved" value={v?.reserved} icon={Clock} tone="bg-amber-500/14 text-warning" to="/admin/inventory?availability=reserved" />
