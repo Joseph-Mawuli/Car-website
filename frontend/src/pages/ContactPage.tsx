@@ -6,7 +6,7 @@ import { EnquiryForm } from '@/features/enquiries/EnquiryForm';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 import { useSettings } from '@/providers/SettingsProvider';
-import { allPhones, buildMailtoLink, buildTelLink, buildWhatsAppLink } from '@/lib/contact';
+import { buildGeneralWhatsAppMessage, buildMailtoLink, buildTelLink, buildWhatsAppLink, contactNumbers } from '@/lib/contact';
 
 const DEFAULT_PRIVACY =
   'We only use the details you submit (your name, phone number, optional email address and message) to respond to your enquiry about our vehicles. Your details are stored securely, are only accessible to authorised Goddel Motors staff, and are not sold or shared with third parties for marketing. To ask us to update or delete your details, contact us using the information on this page.';
@@ -32,8 +32,9 @@ export function ContactPage() {
     if (hash) document.getElementById(hash.slice(1))?.scrollIntoView();
   }, [hash]);
 
-  const phones = allPhones(settings);
-  const hasDirectContact = settings.whatsapp || phones.length > 0 || settings.email || settings.address;
+  const numbers = contactNumbers(settings);
+  const whatsAppMessage = buildGeneralWhatsAppMessage(settings.dealershipName);
+  const hasDirectContact = numbers.length > 0 || settings.email || settings.address;
 
   return (
     <>
@@ -48,20 +49,27 @@ export function ContactPage() {
           </h2>
           {hasDirectContact ? (
             <ul className="mt-6 space-y-6">
-              {settings.whatsapp && (
-                <ContactItem icon={<WhatsAppIcon className="h-5 w-5" />} title="WhatsApp">
-                  <a href={buildWhatsAppLink(settings.whatsapp)} target="_blank" rel="noopener noreferrer" className="font-semibold text-brand-500 hover:text-brand-300 hover:underline">
-                    Chat with us on WhatsApp
-                  </a>
-                </ContactItem>
-              )}
-              {phones.length > 0 && (
-                <ContactItem icon={<Phone className="h-5 w-5" aria-hidden />} title={phones.length > 1 ? 'Phone numbers' : 'Phone'}>
-                  <ul className="space-y-1">
-                    {phones.map((phone) => (
-                      <li key={phone}>
-                        <a href={buildTelLink(phone)} className="font-semibold hover:underline">
-                          {phone}
+              {numbers.length > 0 && (
+                <ContactItem icon={<WhatsAppIcon className="h-5 w-5" />} title="WhatsApp & phone">
+                  <p className="text-sm text-muted">Tap a number to chat with us on WhatsApp.</p>
+                  <ul className="mt-2 space-y-2">
+                    {numbers.map((phone) => (
+                      <li key={phone} className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <a
+                          href={buildWhatsAppLink(phone, whatsAppMessage)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 font-semibold text-fg hover:text-brand-300 hover:underline"
+                          aria-label={`Chat on WhatsApp: ${phone}`}
+                        >
+                          <WhatsAppIcon className="h-4 w-4" /> {phone}
+                        </a>
+                        <a
+                          href={buildTelLink(phone)}
+                          className="inline-flex items-center gap-1 text-sm font-semibold text-brand-500 hover:text-brand-300 hover:underline"
+                          aria-label={`Call ${phone}`}
+                        >
+                          <Phone className="h-3.5 w-3.5" aria-hidden /> Call
                         </a>
                       </li>
                     ))}

@@ -3,12 +3,14 @@ import { Clock, Lock, Mail, MapPin, Phone } from 'lucide-react';
 import { DEFAULT_MOTTO, Logo } from '@/components/brand/Logo';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { useSettings } from '@/providers/SettingsProvider';
-import { allPhones, buildMailtoLink, buildTelLink, buildWhatsAppLink } from '@/lib/contact';
+import { buildGeneralWhatsAppMessage, buildMailtoLink, buildTelLink, buildWhatsAppLink, contactNumbers } from '@/lib/contact';
 import { PUBLIC_NAV } from './PublicHeader';
 
 export function PublicFooter() {
   const { settings } = useSettings();
   const year = new Date().getFullYear();
+  const numbers = contactNumbers(settings);
+  const whatsAppMessage = buildGeneralWhatsAppMessage(settings.dealershipName);
 
   return (
     <footer className="relative mt-16 border-t border-line bg-bg-2 text-white/80">
@@ -37,25 +39,27 @@ export function PublicFooter() {
         <div>
           <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-brand-500">Contact</h2>
           <ul className="mt-4 space-y-3 text-sm">
-            {allPhones(settings).map((phone) => (
-              <li key={phone}>
-                <a href={buildTelLink(phone)} className="inline-flex items-center gap-2 hover:text-brand-300">
-                  <Phone className="h-4 w-4 text-brand-500" aria-hidden /> {phone}
-                </a>
-              </li>
-            ))}
-            {settings.whatsapp && (
-              <li>
+            {numbers.map((phone) => (
+              <li key={phone} className="flex items-center gap-3">
                 <a
-                  href={buildWhatsAppLink(settings.whatsapp)}
+                  href={buildWhatsAppLink(phone, whatsAppMessage)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 hover:text-brand-300"
+                  aria-label={`Chat on WhatsApp: ${phone}`}
                 >
-                  <WhatsAppIcon className="h-4 w-4" /> WhatsApp
+                  <WhatsAppIcon className="h-4 w-4" /> {phone}
+                </a>
+                <a
+                  href={buildTelLink(phone)}
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-full text-brand-500 hover:bg-white/10 hover:text-brand-300"
+                  aria-label={`Call ${phone}`}
+                  title="Call"
+                >
+                  <Phone className="h-3.5 w-3.5" aria-hidden />
                 </a>
               </li>
-            )}
+            ))}
             {settings.email && (
               <li>
                 <a href={buildMailtoLink(settings.email)} className="inline-flex items-center gap-2 break-all hover:text-brand-300">
@@ -68,7 +72,7 @@ export function PublicFooter() {
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" aria-hidden /> <span>{settings.address}</span>
               </li>
             )}
-            {!settings.phone && !settings.whatsapp && !settings.email && (
+            {numbers.length === 0 && !settings.email && (
               <li>
                 <Link to="/contact" className="hover:text-brand-300">
                   Send us an enquiry
