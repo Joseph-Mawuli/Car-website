@@ -119,6 +119,28 @@ export async function addEnquiryNote(id: string, body: string, actor: StaffPrinc
   return getEnquiry(id);
 }
 
+/** Permanently removes an enquiry and returns what it was about (for the audit log, without personal details). */
+export async function deleteEnquiry(id: string): Promise<{ vehicleTitle?: string }> {
+  const doc = await Enquiry.findOneAndDelete({ _id: id }, { projection: { vehicleSnapshot: 1 } }).lean();
+  if (!doc) throw notFound('Enquiry not found.');
+  return { vehicleTitle: doc.vehicleSnapshot?.title };
+}
+
+export const DEFAULT_ENQUIRY_RETENTION_MONTHS = 12;
+
+/**
+ * Deletes closed enquiries with no activity for longer than the owner's retention period,
+ * so customers' contact details aren't kept indefinitely. 0 months means keep forever.
+ */
+export async function purgeExpiredEnquiries(retentionMonths: number, now = new Date()): Promise<number> {
+  if (!(retentionMonths > 0)) return 0;
+  const cutoff = new Date(now);
+  cutoff.setMonth(cutoff.getMonth() - retentionMonths);
+  const res = await Enquiry.deleteMany({ status: 'closed', updatedAt: { $lt: cutoff } });
+  if (res.deletedCount) logger.info('Removed closed enquiries past the retention period', { count: res.deletedCount, retentionMonths });
+  return res.deletedCount;
+}
+
 export async function enquiryCounts() {
   const [newCount, total] = await Promise.all([Enquiry.countDocuments({ status: 'new' }), Enquiry.countDocuments()]);
   return { new: newCount, total };

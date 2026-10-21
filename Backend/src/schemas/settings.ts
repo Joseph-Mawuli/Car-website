@@ -50,6 +50,7 @@ export const updateSettingsSchema = z
     aboutBody: optional(4000),
     whyChooseUs: z.array(z.object({ title: cleanText(60).pipe(z.string().min(1)), body: cleanText(300).pipe(z.string().min(1)) })).max(6).default([]),
     privacyNotice: optional(4000),
+    enquiryRetentionMonths: z.number().int().min(0).max(120).optional(),
   })
   .refine((v) => v.supportedCurrencies.includes(v.defaultCurrency), {
     message: 'The default currency must be one of the supported currencies.',

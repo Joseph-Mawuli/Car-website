@@ -56,6 +56,7 @@ export const adminApi = {
   updateEnquiry: (id: string, body: { status?: EnquiryStatus; assignedTo?: string | null }) =>
     apiRequest<Enquiry>(`/admin/enquiries/${id}`, { ...auth, method: 'PATCH', body }),
   addEnquiryNote: (id: string, body: string) => apiRequest<Enquiry>(`/admin/enquiries/${id}/notes`, { ...auth, method: 'POST', body: { body } }),
+  deleteEnquiry: (id: string) => apiRequest<void>(`/admin/enquiries/${id}`, { ...auth, method: 'DELETE' }),
   assignees: (signal?: AbortSignal) => apiRequest<{ id: string; name: string; role: StaffRole }[]>('/admin/enquiries/assignees', { ...auth, signal }),
 
   listStaff: (signal?: AbortSignal) => apiRequest<StaffMember[]>('/admin/staff', { ...auth, signal }),

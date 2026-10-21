@@ -34,6 +34,8 @@ export interface SiteSettingsRecord {
   aboutBody?: string;
   whyChooseUs: { title: string; body: string }[];
   privacyNotice?: string;
+  /** Closed enquiries are deleted after this many months without activity; 0 keeps them forever. */
+  enquiryRetentionMonths?: number;
   updatedAt: Date;
   createdAt: Date;
 }
@@ -89,6 +91,7 @@ const siteSettingsSchema = new Schema<SiteSettingsRecord>(
     aboutBody: { type: String, maxlength: 4000 },
     whyChooseUs: { type: [{ _id: false, title: String, body: String }], default: [] },
     privacyNotice: { type: String, maxlength: 4000 },
+    enquiryRetentionMonths: { type: Number, min: 0, max: 120, default: 12 },
   },
   { timestamps: true },
 );

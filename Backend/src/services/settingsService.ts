@@ -3,6 +3,7 @@ import type { UpdateSettingsInput } from '../schemas/settings.js';
 import type { CurrencyCode } from '../types/domain.js';
 import { getLiveRates } from './liveRates.js';
 import { mongoMediaUrl } from './storage.js';
+import { DEFAULT_ENQUIRY_RETENTION_MONTHS } from './enquiryService.js';
 
 export async function getSettingsRecord(): Promise<SiteSettingsRecord> {
   const doc = await SiteSettings.findOneAndUpdate(
@@ -61,7 +62,11 @@ export async function serializePublicSettings(s: SiteSettingsRecord) {
 
 /** Admin view: the owner's stored rates for editing, plus today's live rates for comparison. */
 export async function serializeAdminSettings(s: SiteSettingsRecord) {
-  return { ...serializeSettings(s), liveExchangeRates: (await getLiveRates(s.defaultCurrency)) ?? undefined };
+  return {
+    ...serializeSettings(s),
+    enquiryRetentionMonths: s.enquiryRetentionMonths ?? DEFAULT_ENQUIRY_RETENTION_MONTHS,
+    liveExchangeRates: (await getLiveRates(s.defaultCurrency)) ?? undefined,
+  };
 }
 
 /** MongoDB-stored logos are served by this API, so the link is rebuilt for the current host. */
@@ -119,6 +124,7 @@ export async function updateSettings(input: UpdateSettingsInput) {
 
   const { exchangeRates, ...rest } = input;
   const update: Record<string, unknown> = { ...rest };
+  if (input.enquiryRetentionMonths === undefined) delete update.enquiryRetentionMonths;
   const unset: Record<string, ''> = { tagline: '' };
   for (const key of ['motto', 'phone', 'whatsapp', 'email', 'address', 'mapUrl', 'aboutHeading', 'aboutBody', 'privacyNotice'] as const) {
     if (input[key] === undefined) {

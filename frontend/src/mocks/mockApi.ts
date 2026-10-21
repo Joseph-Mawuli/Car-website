@@ -32,6 +32,7 @@ const ALL: Permission[] = [
   'enquiries:read',
   'enquiries:update',
   'enquiries:assign',
+  'enquiries:delete',
   'staff:manage',
   'settings:manage',
   'audit:read',
@@ -126,6 +127,7 @@ const enquiries: Enquiry[] = [
 ];
 
 let settings: AdminSettings = {
+  enquiryRetentionMonths: 12,
   dealershipName: 'Goddel Motors',
   motto: 'Trust In Every Drive',
   logoIncludesName: false,
@@ -233,6 +235,7 @@ export async function handle(path: string, opts: Opts): Promise<unknown> {
     const pub: Partial<AdminSettings> = { ...settings, exchangeRates: effectiveRates() };
     delete pub.updatedAt;
     delete pub.liveExchangeRates;
+    delete pub.enquiryRetentionMonths;
     return pub;
   }
   if (route === 'GET /vehicles/facets') {
@@ -432,6 +435,12 @@ export async function handle(path: string, opts: Opts): Promise<unknown> {
       return paginate(list, Number(q.page ?? 1), 20);
     }
     const e = findEnquiry(r[1]);
+    if (method === 'DELETE') {
+      requirePerm('enquiries:delete');
+      enquiries.splice(enquiries.indexOf(e), 1);
+      log('enquiry.delete', e.vehicle ? `Deleted an enquiry about ${e.vehicle.title}` : 'Deleted a general enquiry');
+      return undefined;
+    }
     if (r[2] === 'notes') {
       const m = requirePerm('enquiries:update');
       e.notes.push({ id: newId(), body: String(body.body), authorName: m.displayName, createdAt: new Date().toISOString() });

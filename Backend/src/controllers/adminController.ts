@@ -76,6 +76,19 @@ export async function addEnquiryNote(req: Request, res: Response) {
   res.status(201).json(await enquiries.addEnquiryNote(id, body, req.staff!));
 }
 
+export async function removeEnquiry(req: Request, res: Response) {
+  const { id } = idParams.parse(req.params);
+  const { vehicleTitle } = await enquiries.deleteEnquiry(id);
+  // The customer's name and contact details are deliberately left out of the audit log.
+  await recordAudit(req.staff!, {
+    action: 'enquiry.delete',
+    targetType: 'enquiry',
+    targetId: id,
+    summary: vehicleTitle ? `Deleted an enquiry about ${vehicleTitle}` : 'Deleted a general enquiry',
+  });
+  res.status(204).end();
+}
+
 export async function assignees(_req: Request, res: Response) {
   res.json(await staff.assignableStaff());
 }

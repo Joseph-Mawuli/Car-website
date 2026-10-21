@@ -36,6 +36,8 @@ vi.mock('../src/services/enquiryService.js', () => ({
   getEnquiry: vi.fn(async () => fakeEnquiry),
   updateEnquiry: vi.fn(async () => fakeEnquiry),
   addEnquiryNote: vi.fn(async () => fakeEnquiry),
+  deleteEnquiry: vi.fn(async () => ({ vehicleTitle: '2020 Toyota Camry' })),
+  DEFAULT_ENQUIRY_RETENTION_MONTHS: 12,
   enquiryCounts: vi.fn(async () => ({ new: 0, total: 0 })),
   recentEnquiries: vi.fn(async () => []),
   createEnquiry: vi.fn(async () => ({ id: ENQUIRY_ID })),
@@ -107,6 +109,7 @@ const CASES: Record<string, Case> = {
   deleteAuditEntry: { method: 'delete', path: `/api/v1/admin/audit-logs/${VEHICLE_ID}` },
   clearAuditLog: { method: 'delete', path: '/api/v1/admin/audit-logs', body: { confirm: true } },
   renameSelf: { method: 'patch', path: '/api/v1/admin/me', body: { displayName: 'New Name' } },
+  deleteEnquiry: { method: 'delete', path: `/api/v1/admin/enquiries/${ENQUIRY_ID}` },
 };
 
 /** Expected access per role — mirrors the spec's role definitions. */

@@ -51,6 +51,7 @@ const schema = z
     aboutBody: z.string().trim().max(4000),
     whyChooseUs: z.array(z.object({ title: z.string().trim().min(1, 'Required.').max(60), body: z.string().trim().min(1, 'Required.').max(300) })).max(6),
     privacyNotice: z.string().trim().max(4000),
+    enquiryRetentionMonths: z.string(),
   })
   .refine((v) => v.supportedCurrencies.includes(v.defaultCurrency), {
     message: 'The default currency must be one of the supported currencies.',
@@ -85,11 +86,12 @@ function toValues(s: AdminSettings): Values {
     aboutBody: s.aboutBody ?? '',
     whyChooseUs: s.whyChooseUs,
     privacyNotice: s.privacyNotice ?? '',
+    enquiryRetentionMonths: String(s.enquiryRetentionMonths ?? 12),
   };
 }
 
 function toPayload(v: Values): Record<string, unknown> {
-  const { ratesPerForeign, rateSource, additionalPhones, ...rest } = v;
+  const { ratesPerForeign, rateSource, additionalPhones, enquiryRetentionMonths, ...rest } = v;
   const rates: Partial<Record<CurrencyCode, number>> = {};
   for (const code of v.supportedCurrencies) {
     const per = ratesPerForeign[code];
@@ -98,6 +100,7 @@ function toPayload(v: Values): Record<string, unknown> {
   return {
     ...rest,
     additionalPhones: splitPhones(additionalPhones),
+    enquiryRetentionMonths: Number(enquiryRetentionMonths),
     exchangeRates: Object.keys(rates).length ? { rates, source: rateSource || undefined } : undefined,
   };
 }
@@ -129,6 +132,14 @@ export function SettingsPage() {
   };
   return <SettingsForm key={data.updatedAt ?? 'initial'} settings={data} onSaved={onSaved} onLogoChange={onLogoChange} />;
 }
+
+const RETENTION_OPTIONS = [
+  { value: '6', label: '6 months' },
+  { value: '12', label: '12 months' },
+  { value: '24', label: '2 years' },
+  { value: '36', label: '3 years' },
+  { value: '0', label: 'Keep forever' },
+];
 
 const LOGO_ACCEPT = 'image/png,image/jpeg,image/webp';
 const MAX_LOGO_MB = 5;
@@ -448,6 +459,12 @@ function SettingsForm({ settings, onSaved, onLogoChange }: { settings: AdminSett
 
         <Section title="Privacy notice" description="Shown on the contact page and linked from enquiry forms. Have this reviewed for your business.">
           <TextAreaField label="Notice text" rows={8} error={errors.privacyNotice?.message} {...register('privacyNotice')} />
+          <SelectField
+            label="Keep closed enquiries for"
+            hint="Customers' names and contact details are deleted automatically once an enquiry has been closed with no activity for this long."
+            options={RETENTION_OPTIONS}
+            {...register('enquiryRetentionMonths')}
+          />
         </Section>
       </div>
 

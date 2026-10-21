@@ -11,6 +11,7 @@ export const PERMISSIONS = [
   'enquiries:read',
   'enquiries:update',
   'enquiries:assign',
+  'enquiries:delete',
   'staff:manage',
   'settings:manage',
   'audit:read',

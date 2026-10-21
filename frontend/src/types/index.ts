@@ -221,6 +221,7 @@ export type Permission =
   | 'enquiries:read'
   | 'enquiries:update'
   | 'enquiries:assign'
+  | 'enquiries:delete'
   | 'staff:manage'
   | 'settings:manage'
   | 'audit:read'
@@ -269,4 +270,6 @@ export interface AdminSettings extends PublicSettings {
   updatedAt?: string;
   /** Today's market rates, shown for comparison. `exchangeRates` here holds the owner's own rates. */
   liveExchangeRates?: ExchangeRates;
+  /** Closed enquiries are deleted after this many months without activity; 0 keeps them forever. */
+  enquiryRetentionMonths?: number;
 }

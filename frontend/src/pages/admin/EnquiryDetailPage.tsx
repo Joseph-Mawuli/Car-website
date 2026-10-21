@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useParams } from 'react-router';
-import { ChevronLeft, ExternalLink, Mail, MessageSquarePlus, Phone } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router';
+import { ChevronLeft, ExternalLink, Mail, MessageSquarePlus, Phone, Trash2 } from 'lucide-react';
 import { adminApi } from '@/features/admin/api';
 import { useAuth } from '@/features/admin/AuthProvider';
 import { EnquiryStatusBadge } from '@/components/ui/Badge';
 import { AnchorButton, Button } from '@/components/ui/Button';
+import { ConfirmDialog } from '@/components/ui/Dialog';
 import { SelectField } from '@/components/ui/Field';
 import { ErrorState, PageLoader } from '@/components/ui/States';
 import { useToast } from '@/components/ui/Toast';
@@ -28,6 +29,9 @@ export function EnquiryDetailPage() {
   const assignees = useQuery(can('enquiries:assign') ? 'assignees' : null, (signal) => adminApi.assignees(signal));
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState<'status' | 'assign' | 'note' | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const navigate = useNavigate();
 
   if (error) return <ErrorState error={error} title="Could not load this enquiry" onRetry={reload} />;
   if (isLoading || !enquiry) return <PageLoader />;
@@ -56,6 +60,18 @@ export function EnquiryDetailPage() {
       notify(errorMessage(err), 'error');
     } finally {
       setSaving(null);
+    }
+  };
+
+  const remove = async () => {
+    setDeleting(true);
+    try {
+      await adminApi.deleteEnquiry(enquiry.id);
+      notify('Enquiry deleted');
+      navigate('/admin/enquiries', { replace: true });
+    } catch (err) {
+      notify(errorMessage(err), 'error');
+      setDeleting(false);
     }
   };
 
@@ -185,8 +201,28 @@ export function EnquiryDetailPage() {
               </div>
             )}
           </section>
+
+          {can('enquiries:delete') && (
+            <section className="card space-y-3 p-5">
+              <h2 className="font-semibold">Customer data</h2>
+              <p className="text-sm text-muted">Permanently delete this enquiry and the customer's contact details, for example if they ask you to.</p>
+              <Button variant="outline" className="w-full hover:!bg-red-500/10 hover:!text-danger" onClick={() => setConfirmDelete(true)} leftIcon={<Trash2 className="h-4 w-4" aria-hidden />}>
+                Delete enquiry
+              </Button>
+            </section>
+          )}
         </aside>
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Delete this enquiry?"
+        description={`${enquiry.name}'s enquiry, contact details and internal notes will be permanently deleted. This can't be undone.`}
+        confirmLabel="Delete enquiry"
+        loading={deleting}
+        onConfirm={remove}
+        onCancel={() => !deleting && setConfirmDelete(false)}
+      />
     </>
   );
 }

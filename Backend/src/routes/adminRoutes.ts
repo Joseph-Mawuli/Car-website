@@ -41,6 +41,7 @@ export function adminRoutes(authDeps: AuthDeps, limiters: RateLimiters): Router 
   router.get('/enquiries/:id', requirePermission('enquiries:read'), admin.getEnquiry);
   router.patch('/enquiries/:id', requirePermission('enquiries:update'), admin.updateEnquiry);
   router.post('/enquiries/:id/notes', requirePermission('enquiries:update'), admin.addEnquiryNote);
+  router.delete('/enquiries/:id', requirePermission('enquiries:delete'), admin.removeEnquiry);
 
   router.get('/staff', requirePermission('staff:manage'), admin.listStaff);
   router.post('/staff', requirePermission('staff:manage'), admin.inviteStaff);

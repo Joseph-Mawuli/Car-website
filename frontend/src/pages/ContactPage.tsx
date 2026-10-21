@@ -9,7 +9,7 @@ import { useSettings } from '@/providers/SettingsProvider';
 import { buildGeneralWhatsAppMessage, buildMailtoLink, buildTelLink, buildWhatsAppLink, contactNumbers } from '@/lib/contact';
 
 const DEFAULT_PRIVACY =
-  'We only use the details you submit (your name, phone number, optional email address and message) to respond to your enquiry about our vehicles. Your details are stored securely, are only accessible to authorised Goddel Motors staff, and are not sold or shared with third parties for marketing. To ask us to update or delete your details, contact us using the information on this page.';
+  'We only use the details you submit (your name, phone number, optional email address and message) to respond to your enquiry about our vehicles. Your details are stored securely, are only accessible to authorised Goddel Motors staff, and are not sold or shared with third parties for marketing. Once your enquiry has been dealt with, we keep it for a limited period and then delete it automatically. To ask us to update or delete your details, contact us using the information on this page.';
 
 function ContactItem({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
