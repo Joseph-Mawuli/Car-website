@@ -14,8 +14,8 @@ export const TEAM: TeamMember[] = [
     name: 'Godman Fiifi Aggrey',
     role: 'Founder & Chief Executive Officer',
     photo: {
-      src: '/images/team/godman-fiifi-aggrey-576.webp',
-      srcSet: '/images/team/godman-fiifi-aggrey-480.webp 480w, /images/team/godman-fiifi-aggrey-576.webp 576w',
+      src: '/images/team/godman-fiifi-aggrey-studio-576.webp',
+      srcSet: '/images/team/godman-fiifi-aggrey-studio-480.webp 480w, /images/team/godman-fiifi-aggrey-studio-576.webp 576w',
       width: 576,
       height: 1024,
     },
@@ -34,5 +34,8 @@ export const TEAM: TeamMember[] = [
       width: 800,
       height: 1000,
     },
+    email: 'angelishieella@gmail.com',
+    instagram: 'queen_sikaba',
+    facebook: { label: 'Sikaba Ella', url: 'https://www.facebook.com/search/top?q=Sikaba%20Ella' },
   },
 ];
