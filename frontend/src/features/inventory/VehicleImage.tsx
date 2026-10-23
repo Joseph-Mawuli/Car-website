@@ -13,10 +13,13 @@ interface Props {
   large?: boolean;
 }
 
-function buildSrcSet(image: VehicleImageRecord): string | undefined {
+/** Phones never need more than the medium size: high-density iPhone screens would otherwise pick the largest file every time. */
+const LARGE_MEDIA = '(min-width: 1024px)';
+
+function buildSrcSet(image: VehicleImageRecord, includeLarge: boolean): string | undefined {
   const variants = image.variants;
   if (!variants) return undefined;
-  const entries = [variants.thumb, variants.medium, variants.large]
+  const entries = [variants.thumb, variants.medium, includeLarge ? variants.large : undefined]
     .filter((v): v is NonNullable<typeof v> => Boolean(v))
     .map((v) => `${v.url} ${v.width}w`);
   return entries.length ? entries.join(', ') : undefined;
@@ -42,14 +45,14 @@ export function VehicleImage({ image, alt, sizes, priority, className, large }: 
     );
   }
 
-  const fallbackSrc = large
-    ? (image.variants?.large?.url ?? image.url)
-    : (image.variants?.medium?.url ?? image.url);
+  const fallbackSrc = image.variants?.medium?.url ?? image.url;
+  const srcSet = buildSrcSet(image, false);
+  const largeSrcSet = large && image.variants?.large ? buildSrcSet(image, true) : undefined;
 
-  return (
+  const img = (
     <img
       src={fallbackSrc}
-      srcSet={buildSrcSet(image)}
+      srcSet={srcSet}
       sizes={sizes}
       alt={image.alt || alt}
       width={image.variants?.medium?.width ?? image.width ?? 1200}
@@ -60,5 +63,12 @@ export function VehicleImage({ image, alt, sizes, priority, className, large }: 
       onError={() => setFailed(true)}
       className={cn('h-full w-full object-cover', className)}
     />
+  );
+  if (!largeSrcSet) return img;
+  return (
+    <picture className="contents">
+      <source media={LARGE_MEDIA} srcSet={largeSrcSet} sizes={sizes} />
+      {img}
+    </picture>
   );
 }
