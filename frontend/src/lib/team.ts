@@ -21,7 +21,6 @@ export const TEAM: TeamMember[] = [
     },
     phones: ['0556062526', '0501655090'],
     email: 'godmanagg@gmail.com',
-    locations: 'Accra / Takoradi',
     instagram: 'aggreydedon',
     facebook: { label: 'Goddy Aggrey', url: 'https://www.facebook.com/search/top?q=Goddy%20Aggrey' },
   },
