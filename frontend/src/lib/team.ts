@@ -33,6 +33,7 @@ export const TEAM: TeamMember[] = [
       width: 800,
       height: 1000,
     },
+    phones: ['0548330049'],
     email: 'angelishieella@gmail.com',
     instagram: 'queen_sikaba',
     facebook: { label: 'Sikaba Ella', url: 'https://www.facebook.com/search/top?q=Sikaba%20Ella' },
