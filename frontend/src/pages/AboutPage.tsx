@@ -5,7 +5,7 @@ import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 import { useSettings } from '@/providers/SettingsProvider';
 import { DEFAULT_WHY_CHOOSE_US, WHY_CHOOSE_US_ICONS } from '@/lib/whyChooseUs';
 import { TEAM, type TeamMember } from '@/lib/team';
-import { buildGeneralWhatsAppMessage, buildGmailComposeLink, buildMailtoLink, buildTelLink, buildWhatsAppLink } from '@/lib/contact';
+import { buildGeneralWhatsAppMessage, buildGmailComposeLink, buildMailtoLink, buildTeamEmailTemplate, buildTelLink, buildWhatsAppLink } from '@/lib/contact';
 import { useToast } from '@/components/ui/Toast';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { FacebookIcon, InstagramIcon } from '@/components/icons/SocialIcons';
@@ -108,6 +108,7 @@ export function AboutPage() {
 function TeamContacts({ member }: { member: TeamMember }) {
   const { settings } = useSettings();
   const greeting = buildGeneralWhatsAppMessage(settings.dealershipName);
+  const emailTemplate = buildTeamEmailTemplate(member.name, settings.dealershipName);
   const row = 'flex items-center gap-2.5 text-sm text-fg-soft';
   const link = 'font-semibold text-fg hover:text-brand-500 hover:underline';
   const iconBtn = 'inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-surface-2 hover:text-fg';
@@ -138,12 +139,12 @@ function TeamContacts({ member }: { member: TeamMember }) {
       {member.email && (
         <li className={row}>
           <Mail className="h-4 w-4 shrink-0 text-brand-500" aria-hidden />
-          <a href={buildMailtoLink(member.email)} className={`${link} min-w-0 break-all`}>
+          <a href={buildMailtoLink(member.email, emailTemplate.subject, emailTemplate.body)} className={`${link} min-w-0 break-all`}>
             {member.email}
           </a>
           <span className="ml-auto flex shrink-0">
             <a
-              href={buildGmailComposeLink(member.email)}
+              href={buildGmailComposeLink(member.email, emailTemplate.subject, emailTemplate.body)}
               target="_blank"
               rel="noopener noreferrer"
               className={iconBtn}

@@ -45,11 +45,33 @@ export function contactNumbers(s: { whatsapp?: string; phone?: string; additiona
 }
 
 /** Opens Gmail's compose screen (the Gmail app on phones), for visitors with no email app set up for mailto links. */
-export function buildGmailComposeLink(email: string, subject?: string): string {
-  const params = new URLSearchParams({ view: 'cm', fs: '1', to: email, ...(subject ? { su: subject } : {}) });
+export function buildGmailComposeLink(email: string, subject?: string, body?: string): string {
+  const params = new URLSearchParams({ view: 'cm', fs: '1', to: email, ...(subject ? { su: subject } : {}), ...(body ? { body } : {}) });
   return `https://mail.google.com/mail/?${params.toString()}`;
 }
 
-export function buildMailtoLink(email: string, subject?: string): string {
-  return subject ? `mailto:${email}?subject=${encodeURIComponent(subject)}` : `mailto:${email}`;
+export function buildMailtoLink(email: string, subject?: string, body?: string): string {
+  const query = [subject && `subject=${encodeURIComponent(subject)}`, body && `body=${encodeURIComponent(body.replace(/\r?\n/g, '\r\n'))}`].filter(Boolean).join('&');
+  return query ? `mailto:${email}?${query}` : `mailto:${email}`;
+}
+
+/** Pre-filled email a visitor sends to a member of the team; the blanks guide them to include what staff need. */
+export function buildTeamEmailTemplate(recipientName: string, businessName: string): { subject: string; body: string } {
+  const firstName = recipientName.split(' ')[0];
+  return {
+    subject: `Vehicle enquiry from the ${businessName} website`,
+    body: [
+      `Hello ${firstName},`,
+      '',
+      `I found your contact on the ${businessName} website and I would like to enquire about a vehicle.`,
+      '',
+      'Vehicle I am interested in: ',
+      'My budget: ',
+      'Best way to reach me (call / WhatsApp / email): ',
+      '',
+      'Thank you,',
+      '[Your name]',
+      '[Your phone number]',
+    ].join('\n'),
+  };
 }

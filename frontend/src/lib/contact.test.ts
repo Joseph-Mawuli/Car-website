@@ -1,10 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { buildGmailComposeLink, buildWhatsAppLink, contactNumbers, normalizeWhatsAppNumber } from './contact';
+import { buildGmailComposeLink, buildMailtoLink, buildWhatsAppLink, contactNumbers, normalizeWhatsAppNumber } from './contact';
 
 describe('buildGmailComposeLink', () => {
   it('opens Gmail compose addressed to the recipient, with an optional subject', () => {
     expect(buildGmailComposeLink('godmanagg@gmail.com')).toBe('https://mail.google.com/mail/?view=cm&fs=1&to=godmanagg%40gmail.com');
     expect(buildGmailComposeLink('a@b.com', 'Car & price')).toContain('su=Car+%26+price');
+    expect(buildGmailComposeLink('a@b.com', 'Hi', 'Line 1\nLine 2')).toContain('body=Line+1%0ALine+2');
+  });
+});
+
+describe('buildMailtoLink', () => {
+  it('encodes subject and body so email apps keep line breaks and spaces', () => {
+    expect(buildMailtoLink('a@b.com')).toBe('mailto:a@b.com');
+    expect(buildMailtoLink('a@b.com', 'Car & price', 'Hello,\nThanks')).toBe('mailto:a@b.com?subject=Car%20%26%20price&body=Hello%2C%0D%0AThanks');
   });
 });
 
