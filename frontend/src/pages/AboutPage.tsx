@@ -5,10 +5,11 @@ import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 import { useSettings } from '@/providers/SettingsProvider';
 import { DEFAULT_WHY_CHOOSE_US, WHY_CHOOSE_US_ICONS } from '@/lib/whyChooseUs';
 import { TEAM, type TeamMember } from '@/lib/team';
-import { buildGeneralWhatsAppMessage, buildMailtoLink, buildTelLink, buildWhatsAppLink } from '@/lib/contact';
+import { buildGeneralWhatsAppMessage, buildGmailComposeLink, buildMailtoLink, buildTelLink, buildWhatsAppLink } from '@/lib/contact';
+import { useToast } from '@/components/ui/Toast';
 import { WhatsAppIcon } from '@/components/icons/WhatsAppIcon';
 import { FacebookIcon, InstagramIcon } from '@/components/icons/SocialIcons';
-import { Mail, MapPin, Phone } from 'lucide-react';
+import { Copy, ExternalLink, Mail, MapPin, Phone } from 'lucide-react';
 
 /** Neutral placeholder shown until the owner adds the dealership's own story in Settings. */
 const PLACEHOLDER_BODY =
@@ -109,6 +110,16 @@ function TeamContacts({ member }: { member: TeamMember }) {
   const greeting = buildGeneralWhatsAppMessage(settings.dealershipName);
   const row = 'flex items-center gap-2.5 text-sm text-fg-soft';
   const link = 'font-semibold text-fg hover:text-brand-500 hover:underline';
+  const iconBtn = 'inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-surface-2 hover:text-fg';
+  const { notify } = useToast();
+  const copyEmail = async (email: string) => {
+    try {
+      await navigator.clipboard.writeText(email);
+      notify('Email address copied');
+    } catch {
+      notify(`Couldn't copy automatically. The address is ${email}`, 'error');
+    }
+  };
   if (!member.phones?.length && !member.email && !member.locations && !member.instagram && !member.facebook) return null;
 
   return (
@@ -127,9 +138,24 @@ function TeamContacts({ member }: { member: TeamMember }) {
       {member.email && (
         <li className={row}>
           <Mail className="h-4 w-4 shrink-0 text-brand-500" aria-hidden />
-          <a href={buildMailtoLink(member.email)} className={`${link} break-all`}>
+          <a href={buildMailtoLink(member.email)} className={`${link} min-w-0 break-all`}>
             {member.email}
           </a>
+          <span className="ml-auto flex shrink-0">
+            <a
+              href={buildGmailComposeLink(member.email)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={iconBtn}
+              aria-label={`Email ${member.name} using Gmail`}
+              title="Open in Gmail"
+            >
+              <ExternalLink className="h-4 w-4" aria-hidden />
+            </a>
+            <button type="button" onClick={() => copyEmail(member.email!)} className={iconBtn} aria-label={`Copy ${member.name}'s email address`} title="Copy email address">
+              <Copy className="h-4 w-4" aria-hidden />
+            </button>
+          </span>
         </li>
       )}
       {member.locations && (

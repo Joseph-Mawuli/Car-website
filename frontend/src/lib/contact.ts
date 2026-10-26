@@ -44,6 +44,12 @@ export function contactNumbers(s: { whatsapp?: string; phone?: string; additiona
   });
 }
 
+/** Opens Gmail's compose screen (the Gmail app on phones), for visitors with no email app set up for mailto links. */
+export function buildGmailComposeLink(email: string, subject?: string): string {
+  const params = new URLSearchParams({ view: 'cm', fs: '1', to: email, ...(subject ? { su: subject } : {}) });
+  return `https://mail.google.com/mail/?${params.toString()}`;
+}
+
 export function buildMailtoLink(email: string, subject?: string): string {
   return subject ? `mailto:${email}?subject=${encodeURIComponent(subject)}` : `mailto:${email}`;
 }

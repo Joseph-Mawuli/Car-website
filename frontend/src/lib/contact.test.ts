@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { buildWhatsAppLink, contactNumbers, normalizeWhatsAppNumber } from './contact';
+import { buildGmailComposeLink, buildWhatsAppLink, contactNumbers, normalizeWhatsAppNumber } from './contact';
+
+describe('buildGmailComposeLink', () => {
+  it('opens Gmail compose addressed to the recipient, with an optional subject', () => {
+    expect(buildGmailComposeLink('godmanagg@gmail.com')).toBe('https://mail.google.com/mail/?view=cm&fs=1&to=godmanagg%40gmail.com');
+    expect(buildGmailComposeLink('a@b.com', 'Car & price')).toContain('su=Car+%26+price');
+  });
+});
 
 describe('normalizeWhatsAppNumber', () => {
   it('keeps international numbers as digits', () => {
